@@ -3,41 +3,36 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Group } from './entities/group.entity';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
 
 @Injectable()
-export class GroupsService {
+export class GroupService {
   constructor(
     @InjectRepository(Group)
-    private groupRepository: Repository<Group>,
+    private readonly groupRepo: Repository<Group>,
   ) {}
 
-  async create(createGroupDto: CreateGroupDto) {
-    const group = this.groupRepository.create(createGroupDto);
-    return await this.groupRepository.save(group);
+  async create(dto: CreateGroupDto): Promise<Group> {
+    const group = this.groupRepo.create(dto);
+    return this.groupRepo.save(group);
   }
 
-  async findAll() {
-    return await this.groupRepository.find({ relations: ['teacher', 'course', 'students'] });
+  async findAll(): Promise<Group[]> {
+    return this.groupRepo.find();
   }
 
-  async findOne(id: string) {
-    const group = await this.groupRepository.findOne({ where: { id }, relations: ['teacher', 'course', 'students'] });
-    if (!group) throw new NotFoundException(`Group with ID ${id} not found`);
+  async findOne(id: number): Promise<Group> {
+    const group = await this.groupRepo.findOneBy({ id });
+    if (!group) throw new NotFoundException('Group not found');
     return group;
   }
 
-  async update(id: string, updateGroupDto: UpdateGroupDto) {
-    const group = await this.groupRepository.preload({
-      id,
-      ...updateGroupDto,
-    });
-    if (!group) throw new NotFoundException(`Group with ID ${id} not found`);
-    return await this.groupRepository.save(group);
+  async update(id: number, dto: Partial<CreateGroupDto>): Promise<Group> {
+    const group = await this.findOne(id);
+    return this.groupRepo.save({ ...group, ...dto });
   }
 
-  async remove(id: string) {
+  async remove(id: number): Promise<void> {
     const group = await this.findOne(id);
-    return await this.groupRepository.remove(group);
+    await this.groupRepo.remove(group);
   }
 }
