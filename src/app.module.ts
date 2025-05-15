@@ -20,6 +20,8 @@ import { BranchesModule } from './branches/branches.module';
 import { LearningCenter } from './learning_centers/entities/learning_center.entity';
 import { Student } from './students/entities/student.entity';
 import { Branch } from './branches/entities/branch.entity';
+import { SubscriptionsModule } from './subscriptions/subscriptions.module';
+import { Subscription } from './subscriptions/entities/subscription.entity';
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { Branch } from './branches/entities/branch.entity';
       username: process.env.PG_USER,
       password: process.env.PG_PASS,
       database: process.env.PG_DB,
-      entities: [User, Course, Group, Payment, Notification, Lead, LearningCenter, Student, Branch],
+      entities: [User, Course, Group, Payment, Notification, Lead, LearningCenter, Student, Branch, Subscription],
       synchronize: true,
     }),
     UsersModule,
@@ -44,6 +46,7 @@ import { Branch } from './branches/entities/branch.entity';
     StudentsModule,
     LearningCentersModule,
     BranchesModule,
+    SubscriptionsModule,
   ],
 })
 export class AppModule {}

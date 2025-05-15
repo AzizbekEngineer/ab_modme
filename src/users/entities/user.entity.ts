@@ -15,7 +15,7 @@ export enum UserStatus {
 
 @Entity('user')
 export class User {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'bigint' })

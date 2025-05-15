@@ -11,7 +11,7 @@ export enum CenterStatus {
 @Entity('learning_centers')
 export class LearningCenter {
   @ApiProperty()
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @ApiProperty()
