@@ -1,34 +1,78 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { GroupsService } from './groups.service';
+import {
+  Controller,
+  Post,
+  Get,
+  Patch,
+  Delete,
+  Param,
+  Body,
+  ParseIntPipe,
+} from '@nestjs/common';
+import { GroupService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
-import { UpdateGroupDto } from './dto/update-group.dto';
+import { Group } from './entities/group.entity';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+} from '@nestjs/swagger';
 
+@ApiTags('Groups')
 @Controller('groups')
-export class GroupsController {
-  constructor(private readonly groupsService: GroupsService) {}
+export class GroupController {
+  constructor(private readonly groupService: GroupService) {}
 
   @Post()
-  create(@Body() createGroupDto: CreateGroupDto) {
-    return this.groupsService.create(createGroupDto);
+  @ApiOperation({ summary: 'Create a new group' })
+  @ApiResponse({
+    status: 201,
+    description: 'Group successfully created',
+    type: Group,
+  })
+  @ApiBody({ type: CreateGroupDto })
+  create(@Body() dto: CreateGroupDto): Promise<Group> {
+    return this.groupService.create(dto);
   }
 
   @Get()
-  findAll() {
-    return this.groupsService.findAll();
+  @ApiOperation({ summary: 'Get all groups' })
+  @ApiResponse({ status: 200, description: 'List of groups', type: [Group] })
+  findAll(): Promise<Group[]> {
+    return this.groupService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.groupsService.findOne(id);
+  @ApiOperation({ summary: 'Get a group by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Group found', type: Group })
+  findOne(@Param('id', ParseIntPipe) id: number): Promise<Group> {
+    return this.groupService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateGroupDto: UpdateGroupDto) {
-    return this.groupsService.update(id, updateGroupDto);
+  @ApiOperation({ summary: 'Update a group by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({
+    status: 200,
+    description: 'Group successfully updated',
+    type: Group,
+  })
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: Partial<CreateGroupDto>,
+  ): Promise<Group> {
+    return this.groupService.update(id, dto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.groupsService.remove(id);
+  @ApiOperation({ summary: 'Delete a group by ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Group deleted' })
+  remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+    return this.groupService.remove(id).then(() => ({
+      message: 'Group deleted successfully',
+    }));
   }
 }

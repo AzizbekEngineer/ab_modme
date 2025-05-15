@@ -1,16 +1,38 @@
-import { IsString, IsDecimal, IsNotEmpty, MinLength } from 'class-validator';
+import { IsString, IsNumber, IsEnum, IsInt, Min } from 'class-validator';
+import { CourseStatus } from '../entities/course.entity';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCourseDto {
-  @IsString()
-  @IsNotEmpty()
-  @MinLength(2)
-  title: string;
+  @ApiProperty({ example: 1, description: 'Branch ID that owns the course' })
+  @IsNumber()
+  branch_id: number;
 
+  @ApiProperty({
+    example: 'Go Backend Bootcamp',
+    description: 'Name of the course',
+  })
   @IsString()
-  @IsNotEmpty()
+  name: string;
+
+  @ApiProperty({ example: 250000, description: 'Price of the course in UZS' })
+  @IsNumber()
+  price: number;
+
+  @ApiProperty({
+    example: 'Comprehensive backend development with Go and PostgreSQL',
+  })
+  @IsString()
   description: string;
 
-  @IsDecimal()
-  @IsNotEmpty()
-  price: number;
+  @ApiProperty({ example: 3, description: 'Course duration in months' })
+  @IsInt()
+  @Min(1)
+  duration_month: number;
+
+  @ApiProperty({
+    enum: CourseStatus,
+    description: 'Current status of the course',
+  })
+  @IsEnum(CourseStatus)
+  status: CourseStatus;
 }

@@ -1,24 +1,30 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, OneToMany } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Group } from '../../groups/entities/group.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+export enum CourseStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
 
 @Entity('courses')
 export class Course {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
 
-  @Column()
-  title: string;
+  @Column({ type: 'bigint' })
+  branch_id: number;
 
-  @Column()
-  description: string;
+  @Column({ type: 'varchar', length: 100 })
+  name: string;
 
-  @Column('decimal')
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
   price: number;
 
-  @ManyToOne(() => User, (user) => user.courses)
-  teacher: User;
+  @Column({ type: 'text' })
+  description: string;
 
-  @OneToMany(() => Group, (group) => group.course)
-  groups: Group[];
+  @Column({ type: 'int' })
+  duration_month: number;
+
+  @Column({ type: 'enum', enum: CourseStatus, default: CourseStatus.ACTIVE })
+  status: CourseStatus;
 }
