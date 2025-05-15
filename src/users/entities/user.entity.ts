@@ -1,43 +1,41 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
-import { Course } from '../../courses/entities/course.entity';
-import { Group } from '../../groups/entities/group.entity';
-import { Payment } from '../../payments/entities/payment.entity';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { IsEnum } from 'class-validator';
 
-@Entity('users')
+export enum UserRole {
+  SUPERADMIN = 'superadmin',
+  ADMIN = 'admin',
+  MANAGER = 'manager',
+  TEACHER = 'teacher',
+}
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+}
+
+@Entity('user')
 export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column()
-  firstName: string;
+  @Column({ type: 'bigint' })
+  branch_id: number;
 
-  @Column()
-  lastName: string;
+  @Column({ type: 'varchar', unique: true })
+  username: string;
 
-  @Column({ unique: true })
-  email: string;
+  @Column({ type: 'varchar' })
+  password_hash: string;
 
-  @Column()
-  password: string;
+  @Column({ type: 'enum', enum: UserRole })
+  role: UserRole;
 
-  @Column({ type: 'enum', enum: ['student', 'teacher', 'admin'], default: 'student' })
-  role: string;
+  @Column({ type: 'varchar' })
+  full_name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'varchar', unique: true })
   phone: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
-  @OneToMany(() => Course, (course) => course.teacher)
-  courses: Course[];
-
-  @OneToMany(() => Group, (group) => group.teacher)
-  groups: Group[];
-
-  @OneToMany(() => Payment, (payment) => payment.student)
-  payments: Payment[];
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
+  status: UserStatus;
 }

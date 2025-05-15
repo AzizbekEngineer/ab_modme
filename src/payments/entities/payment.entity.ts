@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Course } from '../../courses/entities/course.entity';
 
@@ -10,14 +16,18 @@ export class Payment {
   @Column('decimal')
   amount: number;
 
-  @Column({ type: 'enum', enum: ['pending', 'completed', 'failed'], default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'completed', 'failed'],
+    default: 'pending',
+  })
   status: string;
 
-  @ManyToOne(() => User, (user) => user.payments)
-  student: User;
+  // @ManyToOne(() => User, (user) => user.payments)
+  // student: User;
 
-  @ManyToOne(() => Course)
-  course: Course;
+  // @ManyToOne(() => Course)
+  // course: Course;
 
   @CreateDateColumn()
   createdAt: Date;

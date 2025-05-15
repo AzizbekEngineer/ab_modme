@@ -1,4 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+} from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
 @Entity('notifications')
@@ -12,7 +18,11 @@ export class Notification {
   @Column({ type: 'enum', enum: ['sms', 'email', 'push'], default: 'sms' })
   type: string;
 
-  @Column({ type: 'enum', enum: ['pending', 'sent', 'failed'], default: 'pending' })
+  @Column({
+    type: 'enum',
+    enum: ['pending', 'sent', 'failed'],
+    default: 'pending',
+  })
   status: string;
 
   @ManyToOne(() => User)
