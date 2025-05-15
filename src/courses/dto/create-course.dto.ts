@@ -1,8 +1,12 @@
 import { IsString, IsNumber, IsEnum, IsInt, Min } from 'class-validator';
 import { CourseStatus } from '../entities/course.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { PrimaryGeneratedColumn } from 'typeorm';
 
 export class CreateCourseDto {
+  @PrimaryGeneratedColumn()
+  id: number;
+
   @ApiProperty({ example: 1, description: 'Branch ID that owns the course' })
   @IsNumber()
   branch_id: number;

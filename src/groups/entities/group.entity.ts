@@ -8,7 +8,7 @@ export enum GroupStatus {
 
 @Entity('groups')
 export class Group {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'bigint' })

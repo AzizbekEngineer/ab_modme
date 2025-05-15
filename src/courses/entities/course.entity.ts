@@ -7,7 +7,7 @@ export enum CourseStatus {
 
 @Entity('courses')
 export class Course {
-  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column({ type: 'bigint' })
