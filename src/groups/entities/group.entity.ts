@@ -1,25 +1,40 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Course } from '../../courses/entities/course.entity';
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+export enum GroupStatus {
+  ACTIVE = 'active',
+  FINISHED = 'finished',
+  CANCELLED = 'cancelled',
+}
 
 @Entity('groups')
 export class Group {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @PrimaryGeneratedColumn('increment', { type: 'bigint' })
+  id: number;
 
-  @Column()
+  @Column({ type: 'bigint' })
+  teacher_id: number;
+
+  @Column({ type: 'bigint' })
+  branch_id: number;
+
+  @Column({ type: 'bigint' })
+  course_id: number;
+
+  @Column({ type: 'bigint' })
+  room_id: number;
+
+  @Column({ type: 'varchar' })
   name: string;
 
-  @Column()
+  @Column({ type: 'date' })
+  start_date: Date;
+
+  @Column({ type: 'date' })
+  end_date: Date;
+
+  @Column({ type: 'varchar' })
   schedule: string;
 
-  @ManyToOne(() => Course, (course) => course.groups)
-  course: Course;
-
-  @ManyToOne(() => User, (user) => user.groups)
-  teacher: User;
-
-  @ManyToMany(() => User)
-  @JoinTable()
-  students: User[];
+  @Column({ type: 'enum', enum: GroupStatus, default: GroupStatus.ACTIVE })
+  status: GroupStatus;
 }

@@ -3,41 +3,37 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Course } from './entities/course.entity';
 import { CreateCourseDto } from './dto/create-course.dto';
-import { UpdateCourseDto } from './dto/update-course.dto';
 
 @Injectable()
-export class CoursesService {
+export class CourseService {
   constructor(
     @InjectRepository(Course)
-    private courseRepository: Repository<Course>,
+    private readonly courseRepo: Repository<Course>,
   ) {}
 
-  async create(createCourseDto: CreateCourseDto) {
-    const course = this.courseRepository.create(createCourseDto);
-    return await this.courseRepository.save(course);
+  async create(dto: CreateCourseDto): Promise<Course> {
+    const course = this.courseRepo.create(dto);
+    return this.courseRepo.save(course);
   }
 
-  async findAll() {
-    return await this.courseRepository.find({ relations: ['teacher'] });
+  async findAll(): Promise<Course[]> {
+    return this.courseRepo.find();
   }
 
-  async findOne(id: string) {
-    const course = await this.courseRepository.findOne({ where: { id }, relations: ['teacher'] });
-    if (!course) throw new NotFoundException(`Course with ID ${id} not found`);
+  async findOne(id: number): Promise<Course> {
+    const course = await this.courseRepo.findOneBy({ id });
+    if (!course) throw new NotFoundException('Course not found');
     return course;
   }
 
-  async update(id: string, updateCourseDto: UpdateCourseDto) {
-    const course = await this.courseRepository.preload({
-      id,
-      ...updateCourseDto,
-    });
-    if (!course) throw new NotFoundException(`Course with ID ${id} not found`);
-    return await this.courseRepository.save(course);
+  async update(id: number, dto: Partial<CreateCourseDto>): Promise<Course> {
+    const course = await this.findOne(id);
+    const updated = Object.assign(course, dto);
+    return this.courseRepo.save(updated);
   }
 
-  async remove(id: string) {
+  async remove(id: number): Promise<void> {
     const course = await this.findOne(id);
-    return await this.courseRepository.remove(course);
+    await this.courseRepo.remove(course);
   }
 }

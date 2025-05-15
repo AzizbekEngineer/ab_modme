@@ -12,17 +12,27 @@ import { Group } from './groups/entities/group.entity';
 import { Payment } from './payments/entities/payment.entity';
 import { Notification } from './notifications/entities/notification.entity';
 import { Lead } from './leads/entities/lead.entity';
+import { StudentsModule } from './students/students.module';
+import { ConfigModule } from '@nestjs/config';
+import { CacheModule } from '@nestjs/cache-manager';
+import { LearningCentersModule } from './learning_centers/learning_centers.module';
+import { BranchesModule } from './branches/branches.module';
+import { LearningCenter } from './learning_centers/entities/learning_center.entity';
+import { Student } from './students/entities/student.entity';
+import { Branch } from './branches/entities/branch.entity';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    CacheModule.register({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '1234',
-      database: 'modme',
-      entities: [User, Course, Group, Payment, Notification, Lead],
+      host: process.env.PG_HOST,
+      port: +process.env.PG_PORT,
+      username: process.env.PG_USER,
+      password: process.env.PG_PASS,
+      database: process.env.PG_DB,
+      entities: [User, Course, Group, Payment, Notification, Lead, LearningCenter, Student, Branch],
       synchronize: true,
     }),
     UsersModule,
@@ -31,6 +41,9 @@ import { Lead } from './leads/entities/lead.entity';
     PaymentsModule,
     NotificationsModule,
     LeadsModule,
+    StudentsModule,
+    LearningCentersModule,
+    BranchesModule,
   ],
 })
 export class AppModule {}
