@@ -29,7 +29,7 @@ import { Subscription } from './subscriptions/entities/subscription.entity';
     CacheModule.register({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: "postgres",
-      url: "postgresql://postgres:HcKaqszsvlsCeyUdpqElAHvYaQwxFzEX@postgres.railway.internal:5432/railway",
+      url: "postgresql://postgres:HcKaqszsvlsCeyUdpqElAHvYaQwxFzEX@nozomi.proxy.rlwy.net:22265/railway",
       entities: [User, Course, Group, Payment, Notification, Lead, LearningCenter, Student, Branch, Subscription],
       synchronize: true,
       ssl: {
