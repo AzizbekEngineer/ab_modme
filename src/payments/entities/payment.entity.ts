@@ -1,34 +1,51 @@
 import {
   Entity,
-  Column,
   PrimaryGeneratedColumn,
+  Column,
   ManyToOne,
+  JoinColumn,
   CreateDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { Course } from '../../courses/entities/course.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 
-@Entity('payments')
+export enum PaymentMethod {
+  CASH = 'CASH',
+  CARD = 'CARD',
+}
+
+const decimalTransformer = {
+  to: (value: number) => value, 
+  from: (value: string) => parseFloat(value), 
+};
+
+@Entity({ name: 'payments' })
 export class Payment {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  @ApiProperty({ example: 1 })
+  @PrimaryGeneratedColumn({ type: 'bigint' })
+  id: number;
 
-  @Column('decimal')
+  @ApiProperty({ example: 42 })
+  @Column({ type: 'bigint' })
+  enrollmentId: number;
+
+  @ManyToOne(() => Enrollment, (en) => en.payments, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'enrollment_id' })
+  enrollment: Enrollment;
+
+  @ApiProperty({ example: 150.0 })
+  @Column({ type: 'decimal', transformer: decimalTransformer })
   amount: number;
 
-  @Column({
-    type: 'enum',
-    enum: ['pending', 'completed', 'failed'],
-    default: 'pending',
-  })
-  status: string;
+  @ApiProperty({ example: '2025-05-31' })
+  @CreateDateColumn({ name: 'payment_date', type: 'date' })
+  paymentDate: Date;
 
-  // @ManyToOne(() => User, (user) => user.payments)
-  // student: User;
+  @ApiProperty({ example: '2025-05-01' })
+  @Column({ name: 'payment_month', type: 'date' })
+  paymentMonth: Date;
 
-  // @ManyToOne(() => Course)
-  // course: Course;
-
-  @CreateDateColumn()
-  createdAt: Date;
+  @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.CASH })
+  @Column({ type: 'enum', enum: PaymentMethod })
+  paymentMethod: PaymentMethod;
 }
