@@ -14,6 +14,7 @@ export class CreateStudentDto {
     example: 1,
     description: 'Branch ID where the student belongs',
   })
+  @IsInt()
   branch_id: number;
 
   @ApiProperty({
