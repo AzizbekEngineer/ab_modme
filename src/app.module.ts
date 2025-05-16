@@ -28,14 +28,13 @@ import { Subscription } from './subscriptions/entities/subscription.entity';
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     CacheModule.register({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: process.env.PG_HOST,
-      port: +process.env.PG_PORT,
-      username: process.env.PG_USER,
-      password: process.env.PG_PASS,
-      database: process.env.PG_DB,
+      type: "postgres",
+      url: "postgresql://postgres:HcKaqszsvlsCeyUdpqElAHvYaQwxFzEX@postgres.railway.internal:5432/railway",
       entities: [User, Course, Group, Payment, Notification, Lead, LearningCenter, Student, Branch, Subscription],
       synchronize: true,
+      ssl: {
+        rejectUnauthorized: false
+      }
     }),
     UsersModule,
     CoursesModule,
