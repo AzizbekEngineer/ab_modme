@@ -5,7 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 
 async function start() {
-  const PORT = process.env.PORT || 3333;
+  const PORT = process.env.PORT || 5432;
   const app = await NestFactory.create(AppModule); 
 
   app.setGlobalPrefix('/api');
