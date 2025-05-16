@@ -1,10 +1,22 @@
-import { IsDecimal, IsNotEmpty, IsEnum } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsPositive, IsDateString } from 'class-validator';
+import { PaymentMethod } from '../entities/payment.entity';
 
 export class CreatePaymentDto {
-  @IsDecimal()
-  @IsNotEmpty()
+  @ApiProperty({ example: 42 })
+  @IsPositive()
+  enrollmentId: number;
+
+  @ApiProperty({ example: 150.0 })
+  @IsNumber()
+  @IsPositive()
   amount: number;
 
-  @IsEnum(['pending', 'completed', 'failed'], { message: 'Status must be pending, completed, or failed' })
-  status: string;
+  @ApiProperty({ example: '2025-05-01', description: 'Oy boshi sanasi' })
+  @IsDateString()
+  paymentMonth: Date;
+
+  @ApiProperty({ enum: PaymentMethod })
+  @IsEnum(PaymentMethod)
+  paymentMethod: PaymentMethod;
 }
