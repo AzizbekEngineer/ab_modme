@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Notification } from '../../notifications/entities/notification.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -33,4 +34,7 @@ export class Student {
 
   @Column({ type: 'int', default: 0 })
   budget: number;
+
+  @OneToMany(() => Notification, (n) => n.student)
+  notifications: Notification[];
 }
