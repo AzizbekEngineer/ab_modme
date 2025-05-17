@@ -30,7 +30,7 @@ export class Payment {
   enrollmentId: number;
 
   @ManyToOne(() => Enrollment, (en) => en.payments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'enrollment_id' })
+  @JoinColumn({ name: 'enrollmentId' })
   enrollment: Enrollment;
 
   @ApiProperty({ example: 150.0 })

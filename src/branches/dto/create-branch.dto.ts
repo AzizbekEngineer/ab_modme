@@ -20,10 +20,10 @@ export class CreateBranchDto {
   @IsString()
   phone?: string;
 
-  @ApiProperty({ example: 12, required: false })
-  @IsOptional()
-  @IsNumber()
-  manager_id?: number;
+//   @ApiProperty({ example: 12, required: false })
+//   @IsOptional()
+//   @IsNumber()
+//   manager_id?: number;
 
   @ApiProperty({ enum: BranchStatus })
   @IsEnum(BranchStatus)

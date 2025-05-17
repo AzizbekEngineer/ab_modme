@@ -29,8 +29,11 @@ export class BranchService {
     return this.repo.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findOneBy({ id });
+  async findOne(id: number) {
+    return this.repo.findOne({
+      where: { id },
+      relations: ['center', 'users', 'students', 'rooms', 'courses'],
+    });
   }
 
   findByCenterId(id: number) {
