@@ -1,4 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Course } from '../../courses/entities/course.entity';
+import { Room } from '../../rooms/entities/room.entity';
+import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 
 export enum GroupStatus {
   ACTIVE = 'active',
@@ -14,14 +18,23 @@ export class Group {
   @Column({ type: 'bigint' })
   teacher_id: number;
 
-  @Column({ type: 'bigint' })
-  branch_id: number;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'teacher_id' })
+  teacher: User;
 
   @Column({ type: 'bigint' })
   course_id: number;
 
+  @ManyToOne(() => Course)
+  @JoinColumn({ name: 'course_id' })
+  course: Course;
+
   @Column({ type: 'bigint' })
   room_id: number;
+
+  @ManyToOne(() => Room)
+  @JoinColumn({ name: 'room_id' })
+  room: Room;
 
   @Column({ type: 'varchar' })
   name: string;
@@ -37,4 +50,7 @@ export class Group {
 
   @Column({ type: 'enum', enum: GroupStatus, default: GroupStatus.ACTIVE })
   status: GroupStatus;
+
+  @OneToMany(() => Enrollment, (e) => e.group)
+  enrollments: Enrollment[];
 }

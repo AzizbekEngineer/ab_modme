@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { LearningCenter } from '../../learning_centers/entities/learning_center.entity';
 
 @Entity('subscriptions')
 export class Subscription {
@@ -7,6 +8,10 @@ export class Subscription {
 
   @Column()
   center_id: number;
+
+  @ManyToOne(() => LearningCenter)
+  @JoinColumn({ name: 'center_id' })
+  center: LearningCenter;
 
   @Column({ type: 'date' })
   start_date: string;

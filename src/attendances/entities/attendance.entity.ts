@@ -25,7 +25,7 @@ export class Attendance {
   })
   status: 'present' | 'absent' | 'late';
 
-  @ManyToOne(() => Enrollment)
+  @ManyToOne(() => Enrollment, (e) => e.attendances)
   @JoinColumn({ name: 'enrollment_id' })
   enrollment: Enrollment;
 }

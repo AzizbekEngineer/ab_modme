@@ -26,7 +26,7 @@ export class EnrollmentService {
   async findOne(id: number) {
     const enrollment = await this.repo.findOne({
       where: { id },
-      relations: ['student', 'group'],
+      relations: ['student', 'group', 'attendances', 'payments'],
     });
     if (!enrollment) throw new NotFoundException('Enrollment not found');
     return enrollment;

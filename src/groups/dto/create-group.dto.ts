@@ -10,10 +10,6 @@ export class CreateGroupDto {
   @IsNumber()
   teacher_id: number;
 
-  @ApiProperty({ example: 3, description: 'ID of the branch' })
-  @IsNumber()
-  branch_id: number;
-
   @ApiProperty({
     example: 7,
     description: 'ID of the course assigned to the group',

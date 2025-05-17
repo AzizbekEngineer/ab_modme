@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { Student } from './entities/student.entity';
@@ -21,8 +21,13 @@ export class StudentService {
     return this.repo.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findOneBy({ id });
+  async findOne(id: number) {
+    const student = await this.repo.findOne({
+      where: { id },
+      relations: ['branch', 'notifications', 'enrollments'],
+    });
+    if (!student) throw new NotFoundException('Student not found');
+    return student;
   }
 
   async update(id: number, dto: UpdateStudentDto) {
