@@ -53,9 +53,6 @@ import { Attendance } from './attendances/entities/attendance.entity';
         Attendance,
       ],
       synchronize: true,
-      ssl: {
-        rejectUnauthorized: false
-      }
     }),
     UsersModule,
     CoursesModule,
