@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { Subscription } from '../../subscriptions/entities/subscription.entity';
+import { Branch } from '../../branches/entities/branch.entity';
 
 export enum CenterStatus {
   ACTIVE = 'active',
@@ -37,4 +39,10 @@ export class LearningCenter {
   @ApiProperty()
   @Column({ type: 'date' })
   demo_expiry_date: Date;
+
+  @OneToMany(() => Subscription, (subscription) => subscription.center)
+  subscriptions: Subscription[];
+
+  @OneToMany(() => Branch, (branch) => branch.center)
+  branches: Branch[];
 }

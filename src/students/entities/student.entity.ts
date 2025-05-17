@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { Notification } from '../../notifications/entities/notification.entity';
+import { Branch } from '../../branches/entities/branch.entity';
+import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 
 export enum Gender {
   MALE = 'male',
@@ -20,6 +22,10 @@ export class Student {
   @Column({ type: 'bigint' })
   branch_id: number;
 
+  @ManyToOne(() => Branch)
+  @JoinColumn({ name: 'branch_id' })
+  branch: Branch;
+
   @Column({ type: 'varchar' })
   full_name: string;
 
@@ -37,4 +43,7 @@ export class Student {
 
   @OneToMany(() => Notification, (n) => n.student)
   notifications: Notification[];
+
+  @OneToMany(() => Enrollment, (e) => e.student)
+  enrollments: Enrollment[];
 }
