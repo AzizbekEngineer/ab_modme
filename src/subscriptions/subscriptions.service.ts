@@ -22,7 +22,10 @@ export class SubscriptionService {
   }
 
   async findOne(id: number) {
-    const sub = await this.repo.findOne({ where: { id } });
+    const sub = await this.repo.findOne({
+      where: { id },
+      relations: ['center'],
+    });
     if (!sub) throw new NotFoundException('Subscription not found');
     return sub;
   }

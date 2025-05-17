@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { IsEnum } from 'class-validator';
+import { Branch } from '../../branches/entities/branch.entity';
+import { Group } from '../../groups/entities/group.entity';
 
 export enum UserRole {
   SUPERADMIN = 'superadmin',
@@ -21,6 +23,10 @@ export class User {
   @Column({ type: 'bigint' })
   branch_id: number;
 
+  @ManyToOne(() => Branch)
+  @JoinColumn({ name: 'branch_id' })
+  branch: Branch;
+
   @Column({ type: 'varchar', unique: true })
   username: string;
 
@@ -38,4 +44,10 @@ export class User {
 
   @Column({ type: 'enum', enum: UserStatus, default: UserStatus.ACTIVE })
   status: UserStatus;
+
+  @OneToMany(() => Group, (group) => group.teacher)
+  groups: Group[];
+
+  // @OneToMany(() => Branch, (branch) => branch.manager)
+  // branches: Branch[];
 }

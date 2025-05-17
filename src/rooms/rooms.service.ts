@@ -22,7 +22,10 @@ export class RoomService {
   }
 
   async findOne(id: number) {
-    const room = await this.repo.findOne({ where: { id } });
+    const room = await this.repo.findOne({
+      where: { id },
+      relations: ['branch', 'groups'],
+    });
     if (!room) throw new NotFoundException('Room not found');
     return room;
   }

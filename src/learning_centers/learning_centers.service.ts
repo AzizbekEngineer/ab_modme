@@ -34,8 +34,11 @@ export class LearningCenterService {
     return this.repo.find();
   }
 
-  findOne(id: number) {
-    return this.repo.findOneBy({ id });
+  async findOne(id: number) {
+    return this.repo.findOne({
+      where: { id },
+      relations: ['subscriptions', 'branches'],
+    });
   }
 
   async update(id: number, dto: UpdateLearningCenterDto) {
