@@ -37,7 +37,7 @@ export class LearningCenter {
   status: string;
 
   @ApiProperty()
-  @Column({ type: 'date' })
+  @Column({ type: 'date', nullable: true })
   demo_expiry_date: Date;
 
   @OneToMany(() => Subscription, (subscription) => subscription.center)
