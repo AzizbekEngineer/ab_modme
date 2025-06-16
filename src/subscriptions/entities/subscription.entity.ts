@@ -1,5 +1,12 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { LearningCenter } from '../../learning_centers/entities/learning_center.entity';
+
+export enum SubsStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  CANCELLED = 'cancelled',
+  EXPIRED = 'expired',
+}
 
 @Entity('subscriptions')
 export class Subscription {
@@ -19,18 +26,15 @@ export class Subscription {
   @Column({ type: 'date' })
   end_date: string;
 
-  @Column()
-  status: string;
+  @Column({ type: 'decimal' })
+  amount: number;
 
-  @Column({ default: false })
-  is_demo: boolean;
+  @Column({ type: 'enum' })
+  status: SubsStatus;
 
-  @Column({ type: 'date', nullable: true })
-  demo_start_date: string;
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
 
-  @Column({ type: 'date', nullable: true })
-  demo_end_date: string;
-
-  @Column({ type: 'date', nullable: true })
-  last_payment_date: string;
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 }

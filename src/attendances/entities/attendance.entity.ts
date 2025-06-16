@@ -4,6 +4,8 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Enrollment } from '../../enrollments/entities/enrollment.entity';
 
@@ -24,6 +26,12 @@ export class Attendance {
     default: 'present',
   })
   status: 'present' | 'absent' | 'late';
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @ManyToOne(() => Enrollment, (e) => e.attendances)
   @JoinColumn({ name: 'enrollment_id' })
