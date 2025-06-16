@@ -16,14 +16,13 @@ export class LearningCenterService {
     const now = new Date();
     let demo_expiry_date: Date | null = null;
 
-    if (dto.status === CenterStatus.DEMO) {
+    if (dto.subscription_status === CenterStatus.ACTIVE) {
       demo_expiry_date = new Date(now);
       demo_expiry_date.setDate(now.getDate() + 15);
     }
 
     const center = this.repo.create({
       ...dto,
-      registration_date: now,
       demo_expiry_date,
     });
 
