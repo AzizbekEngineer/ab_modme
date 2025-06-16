@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 import { Student } from '../../students/entities/student.entity';
@@ -37,17 +37,23 @@ export class Branch {
   @Column({ type: 'varchar', nullable: true, unique: true })
   phone?: string;
 
-//   @ApiProperty()
-//   @Column({ type: 'bigint', nullable: true })
-//   manager_id?: number;
+  //   @ApiProperty()
+  //   @Column({ type: 'bigint', nullable: true })
+  //   manager_id?: number;
 
-//   @ManyToOne(() => User)
-//   @JoinColumn({ name: 'manager_id' })
-//   manager: User;
+  //   @ManyToOne(() => User)
+  //   @JoinColumn({ name: 'manager_id' })
+  //   manager: User;
 
   @ApiProperty({ enum: BranchStatus })
   @Column({ type: 'enum', enum: BranchStatus, default: BranchStatus.ACTIVE })
   status: string;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToMany(() => User, (user) => user.branch)
   users: User[];
