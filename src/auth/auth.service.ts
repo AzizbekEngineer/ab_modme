@@ -70,6 +70,8 @@ export class AuthService {
       password,
       userPhone,
     } = dto;
+    const now = new Date();
+    let demo_expiry_date: Date | null = null;
 
     const existingUser = await this.userRepo.findOne({
       where: [{ username }, { phone: userPhone }],
@@ -78,10 +80,14 @@ export class AuthService {
       throw new ConflictException('Username or phone already in use');
     }
 
+    demo_expiry_date = new Date(now);
+    demo_expiry_date.setDate(now.getDate() + 15);
+
     const learningCenter = this.learningCenterRepo.create({
       name: learningCenterName,
       phone_number: learningCenterPhone,
       subscription_status: CenterStatus.INACTIVE,
+      demo_expiry_date
     });
     await this.learningCenterRepo.save(learningCenter);
 

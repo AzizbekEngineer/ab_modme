@@ -32,7 +32,7 @@ export class LearningCenter {
   subscription_status: string;
 
   @ApiProperty()
-  @Column({ type: 'date', nullable: true })
+  @CreateDateColumn({ type: 'timestamp', nullable: true })
   demo_expiry_date: Date;
 
   @CreateDateColumn({ type: 'timestamp' })
