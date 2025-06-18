@@ -26,6 +26,7 @@ import { EnrollmentsModule } from './enrollments/enrollments.module';
 import { Enrollment } from './enrollments/entities/enrollment.entity';
 import { AttendancesModule } from './attendances/attendances.module';
 import { Attendance } from './attendances/entities/attendance.entity';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -66,6 +67,7 @@ import { Attendance } from './attendances/entities/attendance.entity';
     RoomsModule,
     EnrollmentsModule,
     AttendancesModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
