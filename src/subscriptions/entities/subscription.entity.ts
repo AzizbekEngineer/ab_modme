@@ -29,7 +29,11 @@ export class Subscription {
   @Column({ type: 'decimal' })
   amount: number;
 
-  @Column({ type: 'enum' })
+  @Column({
+    type: 'enum',
+    enum: SubsStatus,
+    default: SubsStatus.PENDING,
+  })
   status: SubsStatus;
 
   @CreateDateColumn({ type: 'timestamp' })

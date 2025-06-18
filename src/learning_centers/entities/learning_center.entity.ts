@@ -27,7 +27,7 @@ export class LearningCenter {
   @Column({
     type: 'enum',
     enum: CenterStatus,
-    default: CenterStatus.ACTIVE,
+    default: CenterStatus.INACTIVE,
   })
   subscription_status: string;
 
