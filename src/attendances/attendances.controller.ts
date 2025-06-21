@@ -6,11 +6,14 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { AttendanceService } from './attendances.service';
+import { PaginationDto } from '../common/pagination/pagination.dto';
+import { Attendance } from './entities/attendance.entity';
 
 @ApiTags('attendances')
 @Controller('attendances')
@@ -25,8 +28,27 @@ export class AttendanceController {
 
   @Get()
   @ApiOperation({ summary: 'Get all attendance records' })
-  findAll() {
-    return this.service.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of attendance records',
+    type: [Attendance],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.service.findAll(paginationDto);
   }
 
   @Get(':id')

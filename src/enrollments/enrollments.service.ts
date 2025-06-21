@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { Enrollment } from './entities/enrollment.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class EnrollmentService {
@@ -17,10 +18,37 @@ export class EnrollmentService {
     return this.repo.save(enrollment);
   }
 
-  findAll() {
-    return this.repo.find({
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    // Agar Enrollmentda created_at yoki boshqa date bor bo‘lsa
+    if (fromDate && toDate) {
+      where.created_at = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.created_at = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.created_at = LessThanOrEqual(toDate);
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
       relations: ['student', 'group'],
+      skip,
+      take: limit,
+      order: {
+        id: 'DESC',
+      },
     });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
@@ -17,8 +18,10 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { UpdateCourseDto } from './dto/update-course.dto';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @ApiTags('Courses')
 @Controller('courses')
@@ -44,8 +47,22 @@ export class CourseController {
     description: 'List of all courses',
     type: [Course],
   })
-  findAll(): Promise<Course[]> {
-    return this.courseService.findAll();
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.courseService.findAll(paginationDto);
   }
 
   @Get(':id')
