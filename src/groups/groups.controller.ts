@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { GroupService } from './groups.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -17,7 +18,9 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @ApiTags('Groups')
 @Controller('groups')
@@ -38,9 +41,27 @@ export class GroupController {
 
   @Get()
   @ApiOperation({ summary: 'Get all groups' })
-  @ApiResponse({ status: 200, description: 'List of groups', type: [Group] })
-  findAll(): Promise<Group[]> {
-    return this.groupService.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of groups',
+    type: [Group],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.groupService.findAll(paginationDto);
   }
 
   @Get(':id')
