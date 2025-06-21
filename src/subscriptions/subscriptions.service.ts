@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
 import { Subscription } from './entities/subscription.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class SubscriptionService {
@@ -17,8 +18,33 @@ export class SubscriptionService {
     return this.repo.save(sub);
   }
 
-  findAll() {
-    return this.repo.find();
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (fromDate && toDate) {
+      where.created_at = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.created_at = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.created_at = LessThanOrEqual(toDate);
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

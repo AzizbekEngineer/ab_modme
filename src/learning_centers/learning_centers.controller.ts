@@ -7,11 +7,14 @@ import {
   Body,
   ParseIntPipe,
   Patch,
+  Query,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiParam, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { LearningCenterService } from './learning_centers.service';
 import { CreateLearningCenterDto } from './dto/create-learning_center.dto';
 import { UpdateLearningCenterDto } from './dto/update-learning_center.dto';
+import { LearningCenter } from './entities/learning_center.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @ApiTags('Learning Centers')
 @Controller('learning-centers')
@@ -26,8 +29,27 @@ export class LearningCenterController {
 
   @Get()
   @ApiOperation({ summary: 'Get all learning centers' })
-  findAll() {
-    return this.service.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of learning centers',
+    type: [LearningCenter],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.service.findAll(paginationDto);
   }
 
   @Get(':id')
