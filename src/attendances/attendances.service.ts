@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
 import { Attendance } from './entities/attendance.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class AttendanceService {
@@ -17,10 +18,37 @@ export class AttendanceService {
     return this.repo.save(attendance);
   }
 
-  findAll() {
-    return this.repo.find({
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (fromDate && toDate) {
+      where.date = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.date = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.date = LessThanOrEqual(toDate);
+    }
+
+    const [items, total] = await this.repo.findAndCount({
+      where,
       relations: ['enrollment'],
+      skip,
+      take: limit,
+      order: {
+        date: 'DESC',
+      },
     });
+
+    return {
+      data: items,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

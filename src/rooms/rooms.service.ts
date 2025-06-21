@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CreateRoomDto } from './dto/create-room.dto';
 import { UpdateRoomDto } from './dto/update-room.dto';
 import { Room } from './entities/room.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class RoomService {
@@ -17,8 +18,34 @@ export class RoomService {
     return this.repo.save(room);
   }
 
-  findAll() {
-    return this.repo.find();
+  async findAll(paginationDto: PaginationDto): Promise<any> {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    // created_at bo‘yicha filtering
+    if (fromDate && toDate) {
+      where.created_at = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.created_at = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.created_at = LessThanOrEqual(toDate);
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {
