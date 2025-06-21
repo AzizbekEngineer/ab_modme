@@ -8,6 +8,7 @@ import {
   ParseIntPipe,
   Patch,
   Query,
+  UseGuards,Req
 } from '@nestjs/common';
 import { BranchService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
@@ -17,10 +18,12 @@ import {
   ApiParam,
   ApiResponse,
   ApiQuery,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { PaginationDto } from '../common/pagination/pagination.dto';
 import { Branch } from './entities/branch.entity';
+import { SuperAdminGuard } from '../common/guards/super-admin.guard';
 
 @ApiTags('Branches')
 @Controller('branches')
@@ -33,6 +36,8 @@ export class BranchController {
     return this.service.create(dto);
   }
 
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: 'Get all branches' })
   @ApiResponse({
@@ -54,8 +59,9 @@ export class BranchController {
     type: String,
     example: '2025-12-31',
   })
-  findAll(@Query() paginationDto: PaginationDto) {
-    return this.service.findAll(paginationDto);
+  findAll(@Query() paginationDto: PaginationDto, @Req() req:any) {
+    const branch_id = req.user.branch_id
+    return this.service.findAll(paginationDto, branch_id);
   }
 
   @Get(':id')

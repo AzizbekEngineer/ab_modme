@@ -5,7 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 
@@ -32,6 +32,7 @@ export class AuthService {
     private userRepo: Repository<User>,
 
     private readonly jwtService: JwtService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async generateTokens(user: User) {
@@ -70,59 +71,114 @@ export class AuthService {
       password,
       userPhone,
     } = dto;
+
     const now = new Date();
     let demo_expiry_date: Date | null = null;
 
-    const existingUser = await this.userRepo.findOne({
-      where: [{ username }, { phone: userPhone }],
-    });
-    if (existingUser) {
-      throw new ConflictException('Username or phone already in use');
+    // Transactionni boshlaymiz
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // 🔐 Duplicate check - User
+      const existingUser = await queryRunner.manager.findOne(
+        this.userRepo.target,
+        {
+          where: [{ username }, { phone: userPhone }],
+        },
+      );
+      if (existingUser) {
+        throw new ConflictException('Username or phone already in use');
+      }
+
+      // 🔐 Duplicate check - LearningCenter
+      const existingCenter = await queryRunner.manager.findOne(
+        this.learningCenterRepo.target,
+        {
+          where: [
+            { name: learningCenterName },
+            { phone_number: learningCenterPhone },
+          ],
+        },
+      );
+      if (existingCenter) {
+        throw new ConflictException(
+          'Learning center with this name or phone already exists',
+        );
+      }
+
+      // 🔐 Duplicate check - Branch
+      const existingBranch = await queryRunner.manager.findOne(
+        this.branchRepo.target,
+        {
+          where: [{ phone: branchPhone }],
+        },
+      );
+      if (existingBranch) {
+        throw new ConflictException(
+          'Branch with this name or phone already exists',
+        );
+      }
+
+      // 🧾 Demo muddati
+      demo_expiry_date = new Date(now);
+      demo_expiry_date.setDate(now.getDate() + 15);
+
+      // 🏫 Learning Center yaratish
+      const learningCenter = this.learningCenterRepo.create({
+        name: learningCenterName,
+        phone_number: learningCenterPhone,
+        subscription_status: CenterStatus.INACTIVE,
+        demo_expiry_date,
+      });
+      await queryRunner.manager.save(learningCenter);
+
+      // 🏢 Branch yaratish
+      const branch = this.branchRepo.create({
+        center: learningCenter,
+        center_id: learningCenter.id,
+        name: branchName,
+        address: branchAddress,
+        phone: branchPhone,
+        status: BranchStatus.ACTIVE,
+      });
+      await queryRunner.manager.save(branch);
+
+      // 👤 Foydalanuvchi yaratish
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = this.userRepo.create({
+        full_name: fullName,
+        username,
+        password_hash: hashedPassword,
+        phone: userPhone,
+        role: UserRole.SUPERADMIN,
+        status: UserStatus.ACTIVE,
+        branch,
+        branch_id: branch.id,
+      });
+      await queryRunner.manager.save(user);
+
+      // ✅ Transactionni yakunlaymiz
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      // 🔑 Tokenlar
+      const tokens = await this.generateTokens(user);
+
+      return {
+        message: 'Owner successfully registered',
+        centerId: learningCenter.id,
+        branchId: branch.id,
+        userId: user.id,
+        ...tokens,
+      };
+    } catch (error) {
+      // ❌ Xatolik bo‘lsa transactionni orqaga qaytaramiz
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw error;
     }
-
-    demo_expiry_date = new Date(now);
-    demo_expiry_date.setDate(now.getDate() + 15);
-
-    const learningCenter = this.learningCenterRepo.create({
-      name: learningCenterName,
-      phone_number: learningCenterPhone,
-      subscription_status: CenterStatus.INACTIVE,
-      demo_expiry_date
-    });
-    await this.learningCenterRepo.save(learningCenter);
-
-    const branch = this.branchRepo.create({
-      center: learningCenter,
-      center_id: learningCenter.id,
-      name: branchName,
-      address: branchAddress,
-      phone: branchPhone,
-      status: BranchStatus.ACTIVE,
-    });
-    await this.branchRepo.save(branch);
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepo.create({
-      full_name: fullName,
-      username,
-      password_hash: hashedPassword,
-      phone: userPhone,
-      role: UserRole.SUPERADMIN,
-      status: UserStatus.ACTIVE,
-      branch: branch,
-      branch_id: branch.id,
-    });
-    await this.userRepo.save(user);
-
-    const tokens = await this.generateTokens(user);
-
-    return {
-      message: 'Owner successfully registered',
-      centerId: learningCenter.id,
-      branchId: branch.id,
-      userId: user.id,
-      ...tokens,
-    };
   }
 
   async signIn(dto: SignInDto) {
