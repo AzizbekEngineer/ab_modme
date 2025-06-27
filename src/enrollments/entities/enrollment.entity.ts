@@ -5,6 +5,8 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Student } from '../../students/entities/student.entity';
 import { Group } from '../../groups/entities/group.entity';
@@ -39,6 +41,12 @@ export class Enrollment {
   @ManyToOne(() => Group)
   @JoinColumn({ name: 'group_id' })
   group: Group;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToMany(() => Payment, (p) => p.enrollment)
   payments: Payment[];

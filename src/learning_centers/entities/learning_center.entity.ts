@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Subscription } from '../../subscriptions/entities/subscription.entity';
 import { Branch } from '../../branches/entities/branch.entity';
@@ -6,7 +6,6 @@ import { Branch } from '../../branches/entities/branch.entity';
 export enum CenterStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
-  DEMO = 'demo',
   BLOCKED = 'blocked'
 }
 
@@ -24,21 +23,23 @@ export class LearningCenter {
   @Column({ type: 'varchar', length: 20 })
   phone_number: string;
 
-  @ApiProperty()
-  @Column({ type: 'date' })
-  registration_date: Date;
-
   @ApiProperty({ enum: CenterStatus })
   @Column({
     type: 'enum',
     enum: CenterStatus,
-    default: CenterStatus.DEMO,
+    default: CenterStatus.INACTIVE,
   })
-  status: string;
+  subscription_status: string;
 
   @ApiProperty()
-  @Column({ type: 'date', nullable: true })
+  @CreateDateColumn({ type: 'timestamp', nullable: true })
   demo_expiry_date: Date;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToMany(() => Subscription, (subscription) => subscription.center)
   subscriptions: Subscription[];

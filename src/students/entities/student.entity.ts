@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Notification } from '../../notifications/entities/notification.entity';
 import { Branch } from '../../branches/entities/branch.entity';
 import { Enrollment } from '../../enrollments/entities/enrollment.entity';
@@ -40,6 +40,12 @@ export class Student {
 
   @Column({ type: 'int', default: 0 })
   budget: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToMany(() => Notification, (n) => n.student)
   notifications: Notification[];

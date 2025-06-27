@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Course } from '../../courses/entities/course.entity';
 import { Room } from '../../rooms/entities/room.entity';
@@ -50,6 +50,12 @@ export class Group {
 
   @Column({ type: 'enum', enum: GroupStatus, default: GroupStatus.ACTIVE })
   status: GroupStatus;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 
   @OneToMany(() => Enrollment, (e) => e.group)
   enrollments: Enrollment[];

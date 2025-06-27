@@ -13,5 +13,5 @@ export class CreateLearningCenterDto {
 
   @ApiProperty({ enum: CenterStatus })
   @IsEnum(CenterStatus)
-  status: CenterStatus;
+  subscription_status: CenterStatus;
 }

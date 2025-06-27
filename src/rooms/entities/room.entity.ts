@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Branch } from '../../branches/entities/branch.entity';
 import { Group } from '../../groups/entities/group.entity';
 
@@ -19,7 +19,13 @@ export class Room {
 
   @Column({ type: 'int' })
   max_students: number;
-  
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
+
   @OneToMany(() => Group, (group) => group.room)
   groups: Group[];
 }

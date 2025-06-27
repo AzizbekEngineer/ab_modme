@@ -7,11 +7,23 @@ import {
   Body,
   ParseIntPipe,
   Patch,
+  Query,
+  UseGuards,Req
 } from '@nestjs/common';
 import { BranchService } from './branches.service';
 import { CreateBranchDto } from './dto/create-branch.dto';
-import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiQuery,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { UpdateBranchDto } from './dto/update-branch.dto';
+import { PaginationDto } from '../common/pagination/pagination.dto';
+import { Branch } from './entities/branch.entity';
+import { SuperAdminGuard } from '../common/guards/super-admin.guard';
 
 @ApiTags('Branches')
 @Controller('branches')
@@ -24,10 +36,32 @@ export class BranchController {
     return this.service.create(dto);
   }
 
+  @UseGuards(SuperAdminGuard)
+  @ApiBearerAuth()
   @Get()
   @ApiOperation({ summary: 'Get all branches' })
-  findAll() {
-    return this.service.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of branches',
+    type: [Branch],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto, @Req() req:any) {
+    const branch_id = req.user.branch_id
+    return this.service.findAll(paginationDto, branch_id);
   }
 
   @Get(':id')

@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { StudentService } from './students.service';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -17,7 +18,10 @@ import {
   ApiResponse,
   ApiBody,
   ApiParam,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { Student } from './entities/student.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @ApiTags('Students')
 @Controller('students')
@@ -34,9 +38,27 @@ export class StudentController {
 
   @Get()
   @ApiOperation({ summary: 'Get list of all students' })
-  @ApiResponse({ status: 200, description: 'List of students' })
-  findAll() {
-    return this.service.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of students',
+    type: [Student],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.service.findAll(paginationDto);
   }
 
   @Get(':id')

@@ -6,11 +6,14 @@ import {
   Param,
   Delete,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { CreateSubscriptionDto } from './dto/create-subscription.dto';
 import { UpdateSubscriptionDto } from './dto/update-subscription.dto';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { SubscriptionService } from './subscriptions.service';
+import { Subscription } from './entities/subscription.entity';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @ApiTags('subscriptions')
 @Controller('subscriptions')
@@ -26,8 +29,27 @@ export class SubscriptionController {
 
   @Get()
   @ApiOperation({ summary: 'List all subscriptions' })
-  findAll() {
-    return this.service.findAll();
+  @ApiResponse({
+    status: 200,
+    description: 'List of subscriptions',
+    type: [Subscription],
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
+  @ApiQuery({
+    name: 'fromDate',
+    required: false,
+    type: String,
+    example: '2025-01-01',
+  })
+  @ApiQuery({
+    name: 'toDate',
+    required: false,
+    type: String,
+    example: '2025-12-31',
+  })
+  findAll(@Query() paginationDto: PaginationDto) {
+    return this.service.findAll(paginationDto);
   }
 
   @Get(':id')

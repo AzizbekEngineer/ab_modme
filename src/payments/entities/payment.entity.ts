@@ -5,6 +5,7 @@ import {
   ManyToOne,
   JoinColumn,
   CreateDateColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Enrollment } from '../../enrollments/entities/enrollment.entity';
@@ -48,4 +49,10 @@ export class Payment {
   @ApiProperty({ enum: PaymentMethod, example: PaymentMethod.CASH })
   @Column({ type: 'enum', enum: PaymentMethod })
   paymentMethod: PaymentMethod;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 }

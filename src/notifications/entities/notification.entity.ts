@@ -6,6 +6,7 @@ import {
   JoinColumn,
   CreateDateColumn,
   Index,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Student } from '../../students/entities/student.entity';
@@ -65,4 +66,10 @@ export class Notification {
   @ManyToOne(() => Student, (s) => s.notifications)
   @JoinColumn({ name: 'student_id' })
   student: Student;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  created_at: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updated_at: Date;
 }
