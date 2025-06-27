@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { CenterStatus, LearningCenter } from './entities/learning_center.entity';
 import { CreateLearningCenterDto } from './dto/create-learning_center.dto';
 import { UpdateLearningCenterDto } from './dto/update-learning_center.dto';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class LearningCenterService {
@@ -16,22 +17,49 @@ export class LearningCenterService {
     const now = new Date();
     let demo_expiry_date: Date | null = null;
 
-    if (dto.status === CenterStatus.DEMO) {
+    if (dto.subscription_status === CenterStatus.ACTIVE) {
       demo_expiry_date = new Date(now);
       demo_expiry_date.setDate(now.getDate() + 15);
     }
 
     const center = this.repo.create({
       ...dto,
-      registration_date: now,
       demo_expiry_date,
     });
 
     return this.repo.save(center);
   }
 
-  findAll() {
-    return this.repo.find();
+  async findAll(paginationDto: PaginationDto) {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    // Sana bo‘yicha filtering
+    if (fromDate && toDate) {
+      where.created_at = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.created_at = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.created_at = LessThanOrEqual(toDate);
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip,
+      take: limit,
+      order: {
+        id: 'DESC',
+      },
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

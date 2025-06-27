@@ -3,7 +3,8 @@ import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { Student } from './entities/student.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Between, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { PaginationDto } from '../common/pagination/pagination.dto';
 
 @Injectable()
 export class StudentService {
@@ -17,8 +18,33 @@ export class StudentService {
     return this.repo.save(student);
   }
 
-  findAll() {
-    return this.repo.find();
+  async findAll(paginationDto: PaginationDto): Promise<any> {
+    const { page = 1, limit = 20, fromDate, toDate } = paginationDto;
+    const skip = (page - 1) * limit;
+
+    const where: any = {};
+
+    if (fromDate && toDate) {
+      where.created_at = Between(fromDate, toDate);
+    } else if (fromDate) {
+      where.created_at = MoreThanOrEqual(fromDate);
+    } else if (toDate) {
+      where.created_at = LessThanOrEqual(toDate);
+    }
+
+    const [data, total] = await this.repo.findAndCount({
+      where,
+      skip,
+      take: limit,
+      order: { id: 'DESC' },
+    });
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+    };
   }
 
   async findOne(id: number) {

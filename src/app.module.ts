@@ -19,21 +19,24 @@ import { CustomerAnalysisModule } from './customer-analysis/customer-analysis.mo
 import { CompetitorAnalysisModule } from './competitor-analysis/competitor-analysis.module';
 import { CourseAnalysisModule } from './course-analysis/course-analysis.module';
 import { CustomerPersonaModule } from './customer-persona/customer-persona.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     CacheModule.register({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: '1234',
-      database: 'modmee',
-      entities: ['dist/**/*.entity{.ts,.js}'],
-      synchronize: true,
-    }),
+    type: 'postgres',
+  host: 'dpg-d1f6lkpr0fns73chkim0-a.oregon-postgres.render.com',
+  port: 5432,
+  username: 'ab_modme_user',
+  password: '6iI34JX54lhmtA8DgpA6V3FfanvCMhye',
+  database: 'ab_modme',
+  entities: ['dist/**/*.entity{.ts,.js}'],
+  synchronize: false,
+  ssl: true,
+}),
+
     UsersModule,
     CoursesModule,
     GroupsModule,
@@ -51,6 +54,7 @@ import { CustomerPersonaModule } from './customer-persona/customer-persona.modul
     CompetitorAnalysisModule,
     CourseAnalysisModule,
     CustomerPersonaModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
