@@ -33,7 +33,7 @@ import { AuthModule } from './auth/auth.module';
   password: '6iI34JX54lhmtA8DgpA6V3FfanvCMhye',
   database: 'ab_modme',
   entities: ['dist/**/*.entity{.ts,.js}'],
-  synchronize: false,
+  synchronize: true,
   ssl: true,
 }),
 
