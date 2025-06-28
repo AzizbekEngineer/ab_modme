@@ -11,9 +11,9 @@ export class MarketAnalysisController {
     return this.marketAnalysisService.create(createMarketAnalysisDto);
   }
 
-  @Post('create-file')
-  createFile(@Body() createMarketFileDto: CreateMarketFileDto) {
-    return this.marketAnalysisService.createFile(createMarketFileDto);
+  @Post(':id/create-file')
+  createFile(@Param('id') id: number, @Body() createMarketFileDto: CreateMarketFileDto) {
+    return this.marketAnalysisService.createFile(id, createMarketFileDto);
   }
 
   @Post('full')
