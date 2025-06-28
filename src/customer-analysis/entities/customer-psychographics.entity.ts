@@ -1,4 +1,3 @@
-// src/customer-analysis/entities/customer-psychographics.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CustomerAnalysis } from './customer-analysis.entity';
 
@@ -28,6 +27,6 @@ export class CustomerPsychographics {
   @Column({ type: 'text', nullable: true })
   favoriteBrands: string;
 
-  @ManyToOne(() => CustomerAnalysis, customer => customer.psychographics)
+  @ManyToOne(() => CustomerAnalysis, customer => customer.psychographics, { onDelete: 'CASCADE' })
   customer: CustomerAnalysis;
 }

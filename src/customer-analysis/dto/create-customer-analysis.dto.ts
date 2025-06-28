@@ -1,4 +1,3 @@
-// src/customer-analysis/dto/create-customer-analysis.dto.ts
 import { IsString, IsNumber, IsOptional, IsNotEmpty, IsDate, IsBoolean } from 'class-validator';
 
 export class CreateCustomerAnalysisDto {
@@ -16,7 +15,7 @@ export class CreateCustomerAnalysisDto {
 
   @IsString()
   @IsOptional()
-  imageUrl?: string;
+  image?: string; // Fayl nomi sifatida saqlash
 
   @IsNumber()
   @IsOptional()
@@ -50,13 +49,13 @@ export class CreateCustomerAnalysisDto {
   @IsOptional()
   location?: string;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  numberOfChildren?: number;
+  numberOfChildren?: string; // Matnga mos ravishda matn sifatida
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  householdSize?: number;
+  householdSize?: string; // Matnga mos ravishda matn sifatida
 
   @IsString()
   @IsOptional()
@@ -110,13 +109,13 @@ export class CreateCustomerBehaviorDto {
   @IsOptional()
   motivationFactors?: string;
 
-  @IsDate()
+  @IsString()
   @IsOptional()
-  lastPurchaseDate?: Date;
+  lastPurchaseDate?: string; // Matnga mos ravishda matn sifatida
 
-  @IsBoolean()
+  @IsString()
   @IsOptional()
-  triesNewProducts?: boolean;
+  triesNewProducts?: string; // Boolean o‘rniga matn
 
   @IsString()
   @IsOptional()

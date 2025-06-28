@@ -105,11 +105,70 @@ export class MarketAnalysisService {
   }
 
   async findAll() {
-    return await this.marketAnalysisRepository.find({ relations: ['volumes', 'tags', 'pestleAnalyses', 'files'] });
+    return await this.marketAnalysisRepository.find({
+      relations: ['volumes', 'tags', 'pestleAnalyses', 'files'],
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        volumes: {
+          id: true,
+          analysisType: true,
+          value: true,
+          percentage: true,
+          description: true,
+          currency: true,
+        },
+        tags: {
+          id: true,
+          tagName: true,
+        },
+        pestleAnalyses: {
+          id: true,
+          category: true,
+          analysis: true,
+          impact: true,
+        },
+        files: {
+          id: true,
+          fileName: true,
+        },
+      },
+    });
   }
 
   async findOne(id: number) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id }, relations: ['volumes', 'tags', 'pestleAnalyses', 'files'] });
+    const marketAnalysis = await this.marketAnalysisRepository.findOne({
+      where: { id },
+      relations: ['volumes', 'tags', 'pestleAnalyses', 'files'],
+      select: {
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+        volumes: {
+          id: true,
+          analysisType: true,
+          value: true,
+          percentage: true,
+          description: true,
+          currency: true,
+        },
+        tags: {
+          id: true,
+          tagName: true,
+        },
+        pestleAnalyses: {
+          id: true,
+          category: true,
+          analysis: true,
+          impact: true,
+        },
+        files: {
+          id: true,
+          fileName: true,
+        },
+      },
+    });
     if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
     return marketAnalysis;
   }

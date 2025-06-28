@@ -1,5 +1,4 @@
-// src/customer-analysis/customer-analysis.controller.ts
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete, Patch } from '@nestjs/common';
 import { CustomerAnalysisService } from './customer-analysis.service';
 import { CreateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
 
@@ -30,6 +29,11 @@ export class CustomerAnalysisController {
   @Post(':id/dynamic-question')
   addDynamicQuestion(@Param('id') id: number, @Body() createDynamicQuestionDto: CreateCustomerDynamicQuestionDto) {
     return this.customerAnalysisService.addDynamicQuestion(id, createDynamicQuestionDto);
+  }
+
+  @Patch(':id/save')
+  saveAll(@Param('id') id: number, @Body() updateDto: CreateCustomerAnalysisDto) {
+    return this.customerAnalysisService.saveAll(id, updateDto);
   }
 
   @Get()

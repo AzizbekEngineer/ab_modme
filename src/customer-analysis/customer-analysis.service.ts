@@ -1,4 +1,3 @@
-// src/customer-analysis/customer-analysis.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -55,6 +54,12 @@ export class CustomerAnalysisService {
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
     const question = this.dynamicQuestionRepository.create({ ...createDynamicQuestionDto, customer: customerAnalysis });
     return await this.dynamicQuestionRepository.save(question);
+  }
+
+  async saveAll(id: number, updateDto: CreateCustomerAnalysisDto) {
+    const customerAnalysis = await this.findOne(id);
+    Object.assign(customerAnalysis, updateDto);
+    return await this.customerAnalysisRepository.save(customerAnalysis);
   }
 
   async findAll() {
