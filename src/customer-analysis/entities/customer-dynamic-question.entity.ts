@@ -1,4 +1,3 @@
-// src/customer-analysis/entities/customer-dynamic-question.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CustomerAnalysis } from './customer-analysis.entity';
 
@@ -13,6 +12,6 @@ export class CustomerDynamicQuestion {
   @Column({ type: 'text', nullable: true })
   answer: string;
 
-  @ManyToOne(() => CustomerAnalysis, customer => customer.dynamicQuestions)
+  @ManyToOne(() => CustomerAnalysis, customer => customer.dynamicQuestions, { onDelete: 'CASCADE' })
   customer: CustomerAnalysis;
 }

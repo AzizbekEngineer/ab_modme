@@ -1,4 +1,3 @@
-// src/customer-analysis/entities/customer-feedback.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CustomerAnalysis } from './customer-analysis.entity';
 
@@ -28,6 +27,6 @@ export class CustomerFeedback {
   @Column({ type: 'text', nullable: true })
   newsSourcePreference: string;
 
-  @ManyToOne(() => CustomerAnalysis, customer => customer.feedback)
+  @ManyToOne(() => CustomerAnalysis, customer => customer.feedback, { onDelete: 'CASCADE' })
   customer: CustomerAnalysis;
 }

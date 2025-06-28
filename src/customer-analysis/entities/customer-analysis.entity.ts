@@ -1,4 +1,3 @@
-// src/customer-analysis/entities/customer-analysis.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
 import { CustomerPsychographics } from './customer-psychographics.entity';
 import { CustomerBehavior } from './customer-behavior.entity';
@@ -20,7 +19,7 @@ export class CustomerAnalysis {
   participantName: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  imageUrl: string;
+  image: string;
 
   @Column({ type: 'integer', nullable: true })
   age: number;
@@ -46,11 +45,11 @@ export class CustomerAnalysis {
   @Column({ type: 'varchar', length: 255, nullable: true })
   location: string;
 
-  @Column({ type: 'integer', nullable: true })
-  numberOfChildren: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  numberOfChildren: string;
 
-  @Column({ type: 'integer', nullable: true })
-  householdSize: number;
+  @Column({ type: 'varchar', length: 50, nullable: true })
+  householdSize: string;
 
   @Column({ type: 'text', nullable: true })
   languagesSpoken: string;

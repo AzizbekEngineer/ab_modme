@@ -1,4 +1,3 @@
-// src/customer-analysis/entities/customer-behavior.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { CustomerAnalysis } from './customer-analysis.entity';
 
@@ -19,11 +18,11 @@ export class CustomerBehavior {
   @Column({ type: 'text', nullable: true })
   motivationFactors: string;
 
-  @Column({ type: 'date', nullable: true })
-  lastPurchaseDate: Date;
+  @Column({ type: 'text', nullable: true })
+  lastPurchaseDate: string;
 
-  @Column({ type: 'boolean', nullable: true })
-  triesNewProducts: boolean;
+  @Column({ type: 'text', nullable: true })
+  triesNewProducts: string;
 
   @Column({ type: 'text', nullable: true })
   preferredMarketingChannel: string;
@@ -34,6 +33,6 @@ export class CustomerBehavior {
   @Column({ type: 'text', nullable: true })
   brandSwitchReason: string;
 
-  @ManyToOne(() => CustomerAnalysis, customer => customer.behavior)
+  @ManyToOne(() => CustomerAnalysis, customer => customer.behavior, { onDelete: 'CASCADE' })
   customer: CustomerAnalysis;
 }
