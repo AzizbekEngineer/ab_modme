@@ -28,8 +28,10 @@ export class MarketAnalysisService {
     return await this.marketAnalysisRepository.save(marketAnalysis);
   }
 
-  async createFile(createMarketFileDto: CreateMarketFileDto) {
-    const file = this.marketFileRepository.create(createMarketFileDto);
+  async createFile(analysisId: number, createMarketFileDto: CreateMarketFileDto) {
+    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
+    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
+    const file = this.marketFileRepository.create({ ...createMarketFileDto, marketAnalysis });
     return await this.marketFileRepository.save(file);
   }
 
