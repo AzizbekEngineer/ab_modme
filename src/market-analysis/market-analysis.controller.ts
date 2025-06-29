@@ -1,68 +1,43 @@
-import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
 import { MarketAnalysisService } from './market-analysis.service';
-import { CreateMarketAnalysisDto, CreateMarketTagDto, CreatePestleAnalysisDto, CreateMarketFileDto, SaveAllDto, CreateFullMarketAnalysisDto, MarketVolumeDto } from './dto/create-market-analysis.dto';
+import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto } from './dto/create-market-analysis.dto';
 
 @Controller('market-analysis')
 export class MarketAnalysisController {
   constructor(private readonly marketAnalysisService: MarketAnalysisService) {}
 
-  @Post()
-  create(@Body() createMarketAnalysisDto: CreateMarketAnalysisDto) {
-    return this.marketAnalysisService.create(createMarketAnalysisDto);
+  @Post('file')
+  createFile(@Body() createMarketFileDto: CreateMarketFileDto) {
+    return this.marketAnalysisService.createFile(createMarketFileDto);
   }
 
-  @Post(':id/create-file')
-  createFile(@Param('id') id: number, @Body() createMarketFileDto: CreateMarketFileDto) {
-    return this.marketAnalysisService.createFile(id, createMarketFileDto);
+  @Post('file/:fileId/volumes')
+  addVolume(@Param('fileId') fileId: number, @Body() marketVolumeDto: MarketVolumeDto) {
+    return this.marketAnalysisService.addVolumeToFile(fileId, marketVolumeDto);
   }
 
-  @Post('full')
-  createFull(@Body() createFullMarketAnalysisDto: CreateFullMarketAnalysisDto) {
-    return this.marketAnalysisService.createFull(createFullMarketAnalysisDto);
+  @Post('file/:fileId/tags')
+  addTag(@Param('fileId') fileId: number, @Body() createMarketTagDto: CreateMarketTagDto) {
+    return this.marketAnalysisService.addTagToFile(fileId, createMarketTagDto);
   }
 
-  @Post(':id/volumes')
-  addVolume(@Param('id') id: number, @Body() marketVolumeDto: MarketVolumeDto) {
-    return this.marketAnalysisService.addVolume(id, marketVolumeDto);
+  @Post('file/:fileId/pestle')
+  addPestleAnalysis(@Param('fileId') fileId: number, @Body() createPestleAnalysisDto: CreatePestleAnalysisDto) {
+    return this.marketAnalysisService.addPestleToFile(fileId, createPestleAnalysisDto);
   }
 
-  @Post(':id/tags')
-  addTag(@Param('id') id: number, @Body() createMarketTagDto: CreateMarketTagDto) {
-    return this.marketAnalysisService.addTag(id, createMarketTagDto);
+  @Post('file/:fileId/save-all')
+  saveAll(@Param('fileId') fileId: number, @Body() saveAllDto: SaveAllDto) {
+    return this.marketAnalysisService.saveAllToFile(fileId, saveAllDto);
   }
 
-  @Post(':id/pestle')
-  addPestleAnalysis(@Param('id') id: number, @Body() createPestleAnalysisDto: CreatePestleAnalysisDto) {
-    return this.marketAnalysisService.addPestleAnalysis(id, createPestleAnalysisDto);
+  @Get('file/:fileId')
+  findOne(@Param('fileId') fileId: number) {
+    return this.marketAnalysisService.findOneFile(fileId);
   }
 
-  @Post(':id/files')
-  addMarketFile(@Param('id') id: number, @Body() createMarketFileDto: CreateMarketFileDto) {
-    return this.marketAnalysisService.addMarketFile(id, createMarketFileDto);
-  }
-
-  @Post(':id/save-all')
-  saveAll(@Param('id') id: number, @Body() saveAllDto: SaveAllDto) {
-    return this.marketAnalysisService.saveAll(id, saveAllDto);
-  }
-
-  @Get()
-  findAll() {
-    return this.marketAnalysisService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.marketAnalysisService.findOne(id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: number, @Body() updateMarketAnalysisDto: CreateMarketAnalysisDto) {
-    return this.marketAnalysisService.update(id, updateMarketAnalysisDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.marketAnalysisService.remove(id);
+  @Delete('file/:fileId')
+  remove(@Param('fileId') fileId: number) {
+    return this.marketAnalysisService.removeFile(fileId);
   }
 }

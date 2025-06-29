@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { MarketAnalysis } from './market-analysis.entity';
+import { MarketFile } from './market-file.entity';
 
 @Entity('pestle_analysis')
 export class PestleAnalysis {
@@ -15,6 +15,6 @@ export class PestleAnalysis {
   @Column({ type: 'text', nullable: true })
   impact: string;
 
-  @ManyToOne(() => MarketAnalysis, marketAnalysis => marketAnalysis.pestleAnalyses, { onDelete: 'CASCADE' })
-  marketAnalysis: MarketAnalysis;
+  @ManyToOne(() => MarketFile, file => file.pestleAnalyses, { onDelete: 'CASCADE' })
+  marketFile: MarketFile;
 }

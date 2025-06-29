@@ -1,158 +1,114 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { MarketAnalysis } from './entities/market-analysis.entity';
-import { CreateMarketAnalysisDto, CreateMarketTagDto, CreatePestleAnalysisDto, CreateMarketFileDto, SaveAllDto, CreateFullMarketAnalysisDto, MarketVolumeDto } from './dto/create-market-analysis.dto';
-import { MarketTag } from './entities/market-tag.entity';
-import { PestleAnalysis } from './entities/pestle-analysis.entity';
 import { MarketFile } from './entities/market-file.entity';
 import { MarketVolume } from './entities/market-volume.entity';
+import { MarketTag } from './entities/market-tag.entity';
+import { PestleAnalysis } from './entities/pestle-analysis.entity';
+import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto } from './dto/create-market-analysis.dto';
 
 @Injectable()
 export class MarketAnalysisService {
   constructor(
-    @InjectRepository(MarketAnalysis)
-    private marketAnalysisRepository: Repository<MarketAnalysis>,
-    @InjectRepository(MarketTag)
-    private marketTagRepository: Repository<MarketTag>,
-    @InjectRepository(PestleAnalysis)
-    private pestleAnalysisRepository: Repository<PestleAnalysis>,
     @InjectRepository(MarketFile)
     private marketFileRepository: Repository<MarketFile>,
     @InjectRepository(MarketVolume)
     private marketVolumeRepository: Repository<MarketVolume>,
+    @InjectRepository(MarketTag)
+    private marketTagRepository: Repository<MarketTag>,
+    @InjectRepository(PestleAnalysis)
+    private pestleAnalysisRepository: Repository<PestleAnalysis>,
   ) {}
 
-  async create(createMarketAnalysisDto: CreateMarketAnalysisDto) {
-    const marketAnalysis = this.marketAnalysisRepository.create(createMarketAnalysisDto);
-    return await this.marketAnalysisRepository.save(marketAnalysis);
-  }
-
-  async createFile(analysisId: number, createMarketFileDto: CreateMarketFileDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    const existingFile = await this.marketFileRepository.findOne({ where: { fileName: createMarketFileDto.fileName, marketAnalysis: { id: analysisId } } });
-    if (existingFile) {
-      return existingFile;
-    }
-    const file = this.marketFileRepository.create({ ...createMarketFileDto, marketAnalysis });
+  async createFile(createMarketFileDto: CreateMarketFileDto) {
+    const file = this.marketFileRepository.create(createMarketFileDto);
     return await this.marketFileRepository.save(file);
   }
 
-  async createFull(createFullMarketAnalysisDto: CreateFullMarketAnalysisDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.save(this.marketAnalysisRepository.create(createFullMarketAnalysisDto.marketAnalysis));
-    if (createFullMarketAnalysisDto.volumes && createFullMarketAnalysisDto.volumes.length > 0) {
-      const volumes = createFullMarketAnalysisDto.volumes.map(v => this.marketVolumeRepository.create({ ...v, marketAnalysis }));
-      await this.marketVolumeRepository.save(volumes);
-    }
-    if (createFullMarketAnalysisDto.tags && createFullMarketAnalysisDto.tags.length > 0) {
-      const tags = createFullMarketAnalysisDto.tags.map(tag => this.marketTagRepository.create({ ...tag, marketAnalysis }));
-      await this.marketTagRepository.save(tags);
-    }
-    if (createFullMarketAnalysisDto.pestle && createFullMarketAnalysisDto.pestle.length > 0) {
-      const pestle = createFullMarketAnalysisDto.pestle.map(p => this.pestleAnalysisRepository.create({ ...p, marketAnalysis }));
-      await this.pestleAnalysisRepository.save(pestle);
-    }
-    if (createFullMarketAnalysisDto.files && createFullMarketAnalysisDto.files.length > 0) {
-      const files = createFullMarketAnalysisDto.files.map(f => this.marketFileRepository.create({ ...f, marketAnalysis }));
-      await this.marketFileRepository.save(files);
-    }
-    return await this.findOne(marketAnalysis.id);
-  }
-
-  async addVolume(analysisId: number, marketVolumeDto: MarketVolumeDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: marketVolumeDto.analysisType, value: marketVolumeDto.value, marketAnalysis: { id: analysisId } } });
+  async addVolumeToFile(fileId: number, marketVolumeDto: MarketVolumeDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: marketVolumeDto.analysisType, value: marketVolumeDto.value, marketFile: { id: fileId } } });
     if (existingVolume) {
       return existingVolume;
     }
-    const volume = this.marketVolumeRepository.create({ ...marketVolumeDto, marketAnalysis });
+    const volume = this.marketVolumeRepository.create({ ...marketVolumeDto, marketFile: file });
     return await this.marketVolumeRepository.save(volume);
   }
 
-  async addTag(analysisId: number, createMarketTagDto: CreateMarketTagDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    const existingTag = await this.marketTagRepository.findOne({ where: { tagName: createMarketTagDto.tagName, marketAnalysis: { id: analysisId } } });
+  async addTagToFile(fileId: number, createMarketTagDto: CreateMarketTagDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    const existingTag = await this.marketTagRepository.findOne({ where: { tagName: createMarketTagDto.tagName, marketFile: { id: fileId } } });
     if (existingTag) {
       return existingTag;
     }
-    const tag = this.marketTagRepository.create({ ...createMarketTagDto, marketAnalysis });
+    const tag = this.marketTagRepository.create({ ...createMarketTagDto, marketFile: file });
     return await this.marketTagRepository.save(tag);
   }
 
-  async addPestleAnalysis(analysisId: number, createPestleAnalysisDto: CreatePestleAnalysisDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: createPestleAnalysisDto.category, marketAnalysis: { id: analysisId } } });
+  async addPestleToFile(fileId: number, createPestleAnalysisDto: CreatePestleAnalysisDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: createPestleAnalysisDto.category, marketFile: { id: fileId } } });
     if (existingPestle) {
       return existingPestle;
     }
-    const pestle = this.pestleAnalysisRepository.create({ ...createPestleAnalysisDto, marketAnalysis });
+    const pestle = this.pestleAnalysisRepository.create({ ...createPestleAnalysisDto, marketFile: file });
     return await this.pestleAnalysisRepository.save(pestle);
   }
 
-  async addMarketFile(analysisId: number, createMarketFileDto: CreateMarketFileDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    const existingFile = await this.marketFileRepository.findOne({ where: { fileName: createMarketFileDto.fileName, marketAnalysis: { id: analysisId } } });
-    if (existingFile) {
-      return existingFile;
-    }
-    const file = this.marketFileRepository.create({ ...createMarketFileDto, marketAnalysis });
-    return await this.marketFileRepository.save(file);
-  }
-
-  async saveAll(analysisId: number, saveAllDto: SaveAllDto) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
+  async saveAllToFile(fileId: number, saveAllDto: SaveAllDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
     if (saveAllDto.volumes && saveAllDto.volumes.length > 0) {
       for (const volume of saveAllDto.volumes) {
-        const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: volume.analysisType, value: volume.value, marketAnalysis: { id: analysisId } } });
+        const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: volume.analysisType, value: volume.value, marketFile: { id: fileId } } });
         if (!existingVolume) {
-          const newVolume = this.marketVolumeRepository.create({ ...volume, marketAnalysis });
+          const newVolume = this.marketVolumeRepository.create({ ...volume, marketFile: file });
           await this.marketVolumeRepository.save(newVolume);
         }
       }
     }
     if (saveAllDto.tags && saveAllDto.tags.length > 0) {
       for (const tag of saveAllDto.tags) {
-        const existingTag = await this.marketTagRepository.findOne({ where: { tagName: tag.tagName, marketAnalysis: { id: analysisId } } });
+        const existingTag = await this.marketTagRepository.findOne({ where: { tagName: tag.tagName, marketFile: { id: fileId } } });
         if (!existingTag) {
-          const newTag = this.marketTagRepository.create({ ...tag, marketAnalysis });
+          const newTag = this.marketTagRepository.create({ ...tag, marketFile: file });
           await this.marketTagRepository.save(newTag);
         }
       }
     }
     if (saveAllDto.pestle && saveAllDto.pestle.length > 0) {
       for (const pestle of saveAllDto.pestle) {
-        const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: pestle.category, marketAnalysis: { id: analysisId } } });
+        const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: pestle.category, marketFile: { id: fileId } } });
         if (!existingPestle) {
-          const newPestle = this.pestleAnalysisRepository.create({ ...pestle, marketAnalysis });
+          const newPestle = this.pestleAnalysisRepository.create({ ...pestle, marketFile: file });
           await this.pestleAnalysisRepository.save(newPestle);
         }
       }
     }
     if (saveAllDto.files && saveAllDto.files.length > 0) {
-      for (const file of saveAllDto.files) {
-        const existingFile = await this.marketFileRepository.findOne({ where: { fileName: file.fileName, marketAnalysis: { id: analysisId } } });
+      for (const newFile of saveAllDto.files) {
+        const existingFile = await this.marketFileRepository.findOne({ where: { fileName: newFile.fileName, id: fileId } });
         if (!existingFile) {
-          const newFile = this.marketFileRepository.create({ ...file, marketAnalysis });
-          await this.marketFileRepository.save(newFile);
+          const updatedFile = this.marketFileRepository.create({ ...newFile, id: fileId });
+          await this.marketFileRepository.save(updatedFile);
         }
       }
     }
-    return await this.findOne(analysisId);
+    return await this.findOneFile(fileId);
   }
 
-  async findAll() {
-    return await this.marketAnalysisRepository.find({
-      relations: ['volumes', 'tags', 'pestleAnalyses', 'files'],
+  async findOneFile(fileId: number) {
+    const file = await this.marketFileRepository.findOne({
+      where: { id: fileId },
+      relations: ['volumes', 'tags', 'pestleAnalyses'],
       select: {
         id: true,
+        fileName: true,
         createdAt: true,
-        updatedAt: true,
+        lastSavedAt: true,
         volumes: {
           id: true,
           analysisType: true,
@@ -171,58 +127,14 @@ export class MarketAnalysisService {
           analysis: true,
           impact: true,
         },
-        files: {
-          id: true,
-          fileName: true,
-        },
       },
     });
+    if (!file) throw new NotFoundException('File not found');
+    return file;
   }
 
-  async findOne(id: number) {
-    const marketAnalysis = await this.marketAnalysisRepository.findOne({
-      where: { id },
-      relations: ['volumes', 'tags', 'pestleAnalyses', 'files'],
-      select: {
-        id: true,
-        createdAt: true,
-        updatedAt: true,
-        volumes: {
-          id: true,
-          analysisType: true,
-          value: true,
-          percentage: true,
-          description: true,
-          currency: true,
-        },
-        tags: {
-          id: true,
-          tagName: true,
-        },
-        pestleAnalyses: {
-          id: true,
-          category: true,
-          analysis: true,
-          impact: true,
-        },
-        files: {
-          id: true,
-          fileName: true,
-        },
-      },
-    });
-    if (!marketAnalysis) throw new NotFoundException('Market analysis not found');
-    return marketAnalysis;
-  }
-
-  async update(id: number, updateMarketAnalysisDto: CreateMarketAnalysisDto) {
-    const marketAnalysis = await this.findOne(id);
-    Object.assign(marketAnalysis, updateMarketAnalysisDto);
-    return await this.marketAnalysisRepository.save(marketAnalysis);
-  }
-
-  async remove(id: number) {
-    const marketAnalysis = await this.findOne(id);
-    return await this.marketAnalysisRepository.remove(marketAnalysis);
+  async removeFile(fileId: number) {
+    const file = await this.findOneFile(fileId);
+    return await this.marketFileRepository.remove(file);
   }
 }

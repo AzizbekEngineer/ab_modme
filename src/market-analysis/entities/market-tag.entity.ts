@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { MarketAnalysis } from './market-analysis.entity';
+import { MarketFile } from './market-file.entity';
 
 @Entity('market_tags')
 export class MarketTag {
@@ -9,6 +9,6 @@ export class MarketTag {
   @Column({ type: 'varchar', length: 255 })
   tagName: string;
 
-  @ManyToOne(() => MarketAnalysis, marketAnalysis => marketAnalysis.tags, { onDelete: 'CASCADE' })
-  marketAnalysis: MarketAnalysis;
+  @ManyToOne(() => MarketFile, file => file.tags, { onDelete: 'CASCADE' })
+  marketFile: MarketFile;
 }

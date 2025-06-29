@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
-import { MarketAnalysis } from './market-analysis.entity';
+import { MarketFile } from './market-file.entity';
 
 @Entity('market_volumes')
 export class MarketVolume {
@@ -13,14 +13,14 @@ export class MarketVolume {
   value: number;
 
   @Column({ type: 'numeric', precision: 5, scale: 2, nullable: true })
-  percentage: number;
+  percentage?: number;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description?: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  currency: string; // so'm yoki dollar
+  currency?: string; // so'm yoki dollar
 
-  @ManyToOne(() => MarketAnalysis, analysis => analysis.volumes, { onDelete: 'CASCADE' })
-  marketAnalysis: MarketAnalysis;
+  @ManyToOne(() => MarketFile, file => file.volumes, { onDelete: 'CASCADE' })
+  marketFile: MarketFile;
 }
