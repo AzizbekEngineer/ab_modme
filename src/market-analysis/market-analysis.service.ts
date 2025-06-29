@@ -5,7 +5,7 @@ import { MarketFile } from './entities/market-file.entity';
 import { MarketVolume } from './entities/market-volume.entity';
 import { MarketTag } from './entities/market-tag.entity';
 import { PestleAnalysis } from './entities/pestle-analysis.entity';
-import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto } from './dto/create-market-analysis.dto';
+import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto, UpdateMarketFileDto } from './dto/create-market-analysis.dto';
 
 @Injectable()
 export class MarketAnalysisService {
@@ -89,11 +89,11 @@ export class MarketAnalysisService {
       }
     }
     if (saveAllDto.files && saveAllDto.files.length > 0) {
-      for (const newFile of saveAllDto.files) {
-        const existingFile = await this.marketFileRepository.findOne({ where: { fileName: newFile.fileName, id: fileId } });
-        if (!existingFile) {
-          const updatedFile = this.marketFileRepository.create({ ...newFile, id: fileId });
-          await this.marketFileRepository.save(updatedFile);
+      for (const newFileData of saveAllDto.files) {
+        const existingFile = await this.marketFileRepository.findOne({ where: { id: fileId } });
+        if (existingFile) {
+          existingFile.fileName = newFileData.fileName || existingFile.fileName; // File nomini yangilash
+          await this.marketFileRepository.save(existingFile);
         }
       }
     }
@@ -131,6 +131,24 @@ export class MarketAnalysisService {
     });
     if (!file) throw new NotFoundException('File not found');
     return file;
+  }
+
+  async findAllFiles() {
+    return await this.marketFileRepository.find({
+      select: {
+        id: true,
+        fileName: true,
+        createdAt: true,
+        lastSavedAt: true,
+      },
+    });
+  }
+
+  async updateFile(fileId: number, updateMarketFileDto: UpdateMarketFileDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    file.fileName = updateMarketFileDto.fileName;
+    return await this.marketFileRepository.save(file);
   }
 
   async removeFile(fileId: number) {
