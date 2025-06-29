@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty, IsArray, IsEnum, IsDate } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsNotEmpty, IsArray, IsEnum } from 'class-validator';
 
 export enum Currency {
   SOM = 'so\'m',
@@ -9,20 +9,18 @@ export class CreateMarketFileDto {
   @IsString()
   @IsNotEmpty()
   fileName: string;
+}
 
-  @IsOptional()
-  @IsDate()
-  createdAt?: Date;
-
-  @IsOptional()
-  @IsDate()
-  lastSavedAt?: Date;
+export class UpdateMarketFileDto {
+  @IsString()
+  @IsNotEmpty()
+  fileName: string;
 }
 
 export class MarketVolumeDto {
   @IsString()
   @IsNotEmpty()
-  analysisType: string; // PAM, TAM, SAM, SOM
+  analysisType: string;
 
   @IsNumber()
   @IsNotEmpty()

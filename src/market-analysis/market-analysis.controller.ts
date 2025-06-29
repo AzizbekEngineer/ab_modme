@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Put, Delete } from '@nestjs/common';
 import { MarketAnalysisService } from './market-analysis.service';
-import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto } from './dto/create-market-analysis.dto';
+import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto, UpdateMarketFileDto } from './dto/create-market-analysis.dto';
 
 @Controller('market-analysis')
 export class MarketAnalysisController {
@@ -34,6 +34,16 @@ export class MarketAnalysisController {
   @Get('file/:fileId')
   findOne(@Param('fileId') fileId: number) {
     return this.marketAnalysisService.findOneFile(fileId);
+  }
+
+  @Get('files')
+  findAllFiles() {
+    return this.marketAnalysisService.findAllFiles();
+  }
+
+  @Put('file/:fileId')
+  updateFile(@Param('fileId') fileId: number, @Body() updateMarketFileDto: UpdateMarketFileDto) {
+    return this.marketAnalysisService.updateFile(fileId, updateMarketFileDto);
   }
 
   @Delete('file/:fileId')
