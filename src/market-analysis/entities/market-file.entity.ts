@@ -1,5 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { MarketAnalysis } from './market-analysis.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { MarketVolume } from './market-volume.entity';
+import { MarketTag } from './market-tag.entity';
+import { PestleAnalysis } from './pestle-analysis.entity';
 
 @Entity('market_files')
 export class MarketFile {
@@ -15,6 +17,12 @@ export class MarketFile {
   @UpdateDateColumn()
   lastSavedAt: Date;
 
-  @ManyToOne(() => MarketAnalysis, marketAnalysis => marketAnalysis.files, { onDelete: 'CASCADE' })
-  marketAnalysis: MarketAnalysis;
+  @OneToMany(() => MarketVolume, volume => volume.marketFile, { cascade: true })
+  volumes: MarketVolume[];
+
+  @OneToMany(() => MarketTag, tag => tag.marketFile, { cascade: true })
+  tags: MarketTag[];
+
+  @OneToMany(() => PestleAnalysis, pestle => pestle.marketFile, { cascade: true })
+  pestleAnalyses: PestleAnalysis[];
 }
