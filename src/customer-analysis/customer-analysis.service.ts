@@ -77,7 +77,7 @@ export class CustomerAnalysisService {
       const feedback = this.feedbackRepository.create({ ...updateDto.feedback, customer: customerAnalysis });
       await this.feedbackRepository.save(feedback);
     }
-    if (updateDto.dynamicQuestions) {
+    if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       for (const questionDto of updateDto.dynamicQuestions) {
         const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
         await this.dynamicQuestionRepository.save(question);
@@ -101,7 +101,7 @@ export class CustomerAnalysisService {
       const feedback = this.feedbackRepository.create({ ...updateDto.feedback, customer: customerAnalysis });
       await this.feedbackRepository.save(feedback);
     }
-    if (updateDto.dynamicQuestions) {
+    if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       for (const questionDto of updateDto.dynamicQuestions) {
         const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
         await this.dynamicQuestionRepository.save(question);
