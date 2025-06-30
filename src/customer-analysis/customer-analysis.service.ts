@@ -90,16 +90,16 @@ export class CustomerAnalysisService {
     const customerAnalysis = await this.findOne(id);
     Object.assign(customerAnalysis, updateDto);
     if (updateDto.psychographics) {
-      const psychographics = this.psychographicsRepository.create({ ...updateDto.psychographics, customer: customerAnalysis });
-      await this.psychographicsRepository.save(psychographics);
+      const psychographicsToSave = this.psychographicsRepository.create(Array.isArray(updateDto.psychographics) ? updateDto.psychographics.map(p => ({ ...p, customer: customerAnalysis })) : [{ ...updateDto.psychographics, customer: customerAnalysis }]);
+      await this.psychographicsRepository.save(psychographicsToSave);
     }
     if (updateDto.behavior) {
-      const behavior = this.behaviorRepository.create({ ...updateDto.behavior, customer: customerAnalysis });
-      await this.behaviorRepository.save(behavior);
+      const behaviorToSave = this.behaviorRepository.create(Array.isArray(updateDto.behavior) ? updateDto.behavior.map(b => ({ ...b, customer: customerAnalysis })) : [{ ...updateDto.behavior, customer: customerAnalysis }]);
+      await this.behaviorRepository.save(behaviorToSave);
     }
     if (updateDto.feedback) {
-      const feedback = this.feedbackRepository.create({ ...updateDto.feedback, customer: customerAnalysis });
-      await this.feedbackRepository.save(feedback);
+      const feedbackToSave = this.feedbackRepository.create(Array.isArray(updateDto.feedback) ? updateDto.feedback.map(f => ({ ...f, customer: customerAnalysis })) : [{ ...updateDto.feedback, customer: customerAnalysis }]);
+      await this.feedbackRepository.save(feedbackToSave);
     }
     if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       for (const questionDto of updateDto.dynamicQuestions) {
