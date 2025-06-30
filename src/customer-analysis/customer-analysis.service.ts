@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomerAnalysis } from './entities/customer-analysis.entity';
-import { CreateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
+import { CreateCustomerAnalysisDto, UpdateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
 import { CustomerPsychographics } from './entities/customer-psychographics.entity';
 import { CustomerBehavior } from './entities/customer-behavior.entity';
 import { CustomerFeedback } from './entities/customer-feedback.entity';
@@ -25,6 +25,12 @@ export class CustomerAnalysisService {
 
   async create(createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
     const customerAnalysis = this.customerAnalysisRepository.create(createCustomerAnalysisDto);
+    return await this.customerAnalysisRepository.save(customerAnalysis);
+  }
+
+  async updateBasicInfo(id: number, updateCustomerAnalysisDto: UpdateCustomerAnalysisDto) {
+    const customerAnalysis = await this.findOne(id);
+    Object.assign(customerAnalysis, updateCustomerAnalysisDto);
     return await this.customerAnalysisRepository.save(customerAnalysis);
   }
 
@@ -56,9 +62,51 @@ export class CustomerAnalysisService {
     return await this.dynamicQuestionRepository.save(question);
   }
 
-  async saveAll(id: number, updateDto: CreateCustomerAnalysisDto) {
+  async saveAll(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
+    const customerAnalysis = await this.findOne(id);
+    if (updateDto) Object.assign(customerAnalysis, updateDto);
+    if (updateDto.psychographics) {
+      const psychographics = this.psychographicsRepository.create({ ...updateDto.psychographics, customer: customerAnalysis });
+      await this.psychographicsRepository.save(psychographics);
+    }
+    if (updateDto.behavior) {
+      const behavior = this.behaviorRepository.create({ ...updateDto.behavior, customer: customerAnalysis });
+      await this.behaviorRepository.save(behavior);
+    }
+    if (updateDto.feedback) {
+      const feedback = this.feedbackRepository.create({ ...updateDto.feedback, customer: customerAnalysis });
+      await this.feedbackRepository.save(feedback);
+    }
+    if (updateDto.dynamicQuestions) {
+      for (const questionDto of updateDto.dynamicQuestions) {
+        const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
+        await this.dynamicQuestionRepository.save(question);
+      }
+    }
+    return await this.customerAnalysisRepository.save(customerAnalysis);
+  }
+
+  async updateAllInfo(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     const customerAnalysis = await this.findOne(id);
     Object.assign(customerAnalysis, updateDto);
+    if (updateDto.psychographics) {
+      const psychographics = this.psychographicsRepository.create({ ...updateDto.psychographics, customer: customerAnalysis });
+      await this.psychographicsRepository.save(psychographics);
+    }
+    if (updateDto.behavior) {
+      const behavior = this.behaviorRepository.create({ ...updateDto.behavior, customer: customerAnalysis });
+      await this.behaviorRepository.save(behavior);
+    }
+    if (updateDto.feedback) {
+      const feedback = this.feedbackRepository.create({ ...updateDto.feedback, customer: customerAnalysis });
+      await this.feedbackRepository.save(feedback);
+    }
+    if (updateDto.dynamicQuestions) {
+      for (const questionDto of updateDto.dynamicQuestions) {
+        const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
+        await this.dynamicQuestionRepository.save(question);
+      }
+    }
     return await this.customerAnalysisRepository.save(customerAnalysis);
   }
 
@@ -70,12 +118,6 @@ export class CustomerAnalysisService {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
     return customerAnalysis;
-  }
-
-  async update(id: number, updateCustomerAnalysisDto: CreateCustomerAnalysisDto) {
-    const customerAnalysis = await this.findOne(id);
-    Object.assign(customerAnalysis, updateCustomerAnalysisDto);
-    return await this.customerAnalysisRepository.save(customerAnalysis);
   }
 
   async remove(id: number) {

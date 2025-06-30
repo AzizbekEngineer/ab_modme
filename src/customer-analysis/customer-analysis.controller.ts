@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Param, Put, Delete, Patch } from '@nestjs/common';
 import { CustomerAnalysisService } from './customer-analysis.service';
-import { CreateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
+import { CreateCustomerAnalysisDto, UpdateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
 
 @Controller('customer-analysis')
 export class CustomerAnalysisController {
@@ -9,6 +9,11 @@ export class CustomerAnalysisController {
   @Post()
   create(@Body() createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
     return this.customerAnalysisService.create(createCustomerAnalysisDto);
+  }
+
+  @Post(':id/update')
+  updateBasicInfo(@Param('id') id: number, @Body() updateCustomerAnalysisDto: UpdateCustomerAnalysisDto) {
+    return this.customerAnalysisService.updateBasicInfo(id, updateCustomerAnalysisDto);
   }
 
   @Post(':id/psychographics')
@@ -32,8 +37,13 @@ export class CustomerAnalysisController {
   }
 
   @Patch(':id/save')
-  saveAll(@Param('id') id: number, @Body() updateDto: CreateCustomerAnalysisDto) {
+  saveAll(@Param('id') id: number, @Body() updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     return this.customerAnalysisService.saveAll(id, updateDto);
+  }
+
+  @Put(':id/update-all')
+  updateAllInfo(@Param('id') id: number, @Body() updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
+    return this.customerAnalysisService.updateAllInfo(id, updateDto);
   }
 
   @Get()
@@ -44,11 +54,6 @@ export class CustomerAnalysisController {
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.customerAnalysisService.findOne(id);
-  }
-
-  @Put(':id')
-  update(@Param('id') id: number, @Body() updateCustomerAnalysisDto: CreateCustomerAnalysisDto) {
-    return this.customerAnalysisService.update(id, updateCustomerAnalysisDto);
   }
 
   @Delete(':id')

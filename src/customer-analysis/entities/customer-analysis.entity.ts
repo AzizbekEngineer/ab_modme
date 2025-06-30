@@ -9,8 +9,8 @@ export class CustomerAnalysis {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  analysisNumber: string;
+  @Column({ type: 'varchar', length: 255, nullable: false })
+  fileName: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   companyRepresentative: string;

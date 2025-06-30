@@ -1,163 +1,169 @@
-import { IsString, IsNumber, IsOptional, IsNotEmpty, IsDate, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateCustomerAnalysisDto {
   @IsString()
-  @IsOptional()
-  analysisNumber?: string;
+  @IsNotEmpty()
+  fileName: string;
+}
+
+export class UpdateCustomerAnalysisDto {
+  @IsString()
+  @IsNotEmpty()
+  fileName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  companyRepresentative: string;
+
+  @IsString()
+  @IsNotEmpty()
+  participantName: string;
 
   @IsString()
   @IsOptional()
-  companyRepresentative?: string;
-
-  @IsString()
-  @IsOptional()
-  participantName?: string;
-
-  @IsString()
-  @IsOptional()
-  image?: string; // Fayl nomi sifatida saqlash
+  image: string;
 
   @IsNumber()
   @IsOptional()
-  age?: number;
+  age: number;
 
   @IsString()
   @IsOptional()
-  gender?: string;
+  gender: string;
 
   @IsString()
   @IsOptional()
-  maritalStatus?: string;
+  maritalStatus: string;
 
   @IsString()
   @IsOptional()
-  educationLevel?: string;
+  educationLevel: string;
 
   @IsString()
   @IsOptional()
-  workplace?: string;
+  workplace: string;
 
   @IsString()
   @IsOptional()
-  position?: string;
+  position: string;
 
   @IsNumber()
   @IsOptional()
-  annualIncome?: number;
+  annualIncome: number;
 
   @IsString()
   @IsOptional()
-  location?: string;
+  location: string;
 
   @IsString()
   @IsOptional()
-  numberOfChildren?: string; // Matnga mos ravishda matn sifatida
+  numberOfChildren: string;
 
   @IsString()
   @IsOptional()
-  householdSize?: string; // Matnga mos ravishda matn sifatida
+  householdSize: string;
 
   @IsString()
   @IsOptional()
-  languagesSpoken?: string;
+  languagesSpoken: string;
 }
 
 export class CreateCustomerPsychographicsDto {
   @IsString()
   @IsOptional()
-  hobbies?: string;
+  hobbies: string;
 
   @IsString()
   @IsOptional()
-  socialMedia?: string;
+  socialMedia: string;
 
   @IsString()
   @IsOptional()
-  frequentWebsites?: string;
+  frequentWebsites: string;
 
   @IsString()
   @IsOptional()
-  values?: string;
+  values: string;
 
   @IsString()
   @IsOptional()
-  lifeGoals?: string;
+  lifeGoals: string;
 
   @IsString()
   @IsOptional()
-  freeTimeActivities?: string;
+  freeTimeActivities: string;
 
   @IsString()
   @IsOptional()
-  favoriteBrands?: string;
+  favoriteBrands: string;
 }
 
 export class CreateCustomerBehaviorDto {
   @IsString()
   @IsOptional()
-  purchaseFrequency?: string;
+  purchaseFrequency: string;
 
   @IsString()
   @IsOptional()
-  purchaseLocation?: string;
+  purchaseLocation: string;
 
   @IsString()
   @IsOptional()
-  infoSources?: string;
+  infoSources: string;
 
   @IsString()
   @IsOptional()
-  motivationFactors?: string;
+  motivationFactors: string;
 
   @IsString()
   @IsOptional()
-  lastPurchaseDate?: string; // Matnga mos ravishda matn sifatida
+  lastPurchaseDate: string;
 
   @IsString()
   @IsOptional()
-  triesNewProducts?: string; // Boolean o‘rniga matn
+  triesNewProducts: string;
 
   @IsString()
   @IsOptional()
-  preferredMarketingChannel?: string;
+  preferredMarketingChannel: string;
 
   @IsString()
   @IsOptional()
-  referralLikelihood?: string;
+  referralLikelihood: string;
 
   @IsString()
   @IsOptional()
-  brandSwitchReason?: string;
+  brandSwitchReason: string;
 }
 
 export class CreateCustomerFeedbackDto {
   @IsString()
   @IsOptional()
-  importantFeatures?: string;
+  importantFeatures: string;
 
   @IsString()
   @IsOptional()
-  desiredChanges?: string;
+  desiredChanges: string;
 
   @IsString()
   @IsOptional()
-  priceVsQualityPreference?: string;
+  priceVsQualityPreference: string;
 
   @IsString()
   @IsOptional()
-  preferredPaymentMethod?: string;
+  preferredPaymentMethod: string;
 
   @IsString()
   @IsOptional()
-  likedDislikedAspects?: string;
+  likedDislikedAspects: string;
 
   @IsString()
   @IsOptional()
-  additionalSuggestions?: string;
+  additionalSuggestions: string;
 
   @IsString()
   @IsOptional()
-  newsSourcePreference?: string;
+  newsSourcePreference: string;
 }
 
 export class CreateCustomerDynamicQuestionDto {
@@ -167,5 +173,5 @@ export class CreateCustomerDynamicQuestionDto {
 
   @IsString()
   @IsOptional()
-  answer?: string;
+  answer: string;
 }
