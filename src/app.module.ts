@@ -25,19 +25,20 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     CacheModule.register({ isGlobal: true }),
-    TypeOrmModule.forRoot({
+   TypeOrmModule.forRoot({
   type: 'postgres',
-  host: 'dpg-d1f6lkpr0fns73chkim0-a.oregon-postgres.render.com',
+  host: 'switchback.proxy.rlwy.net',
   port: 5432,
-  username: 'ab_modme_user',
-  password: '6iI34JX54lhmtA8DgpA6V3FfanvCMhye',
-  database: 'ab_modme',
+  username: 'postgres',
+  password: 'kzkKIsLBmILciwKoRmbLdZPtQawOsheO',
+  database: 'railway',
   autoLoadEntities: true,
   synchronize: true,
   ssl: {
     rejectUnauthorized: false,
   },
 }),
+
 
 
     UsersModule,
