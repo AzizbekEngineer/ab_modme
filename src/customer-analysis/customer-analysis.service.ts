@@ -89,39 +89,73 @@ export class CustomerAnalysisService {
   async updateAllInfo(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     const customerAnalysis = await this.findOne(id);
     Object.assign(customerAnalysis, updateDto);
-    console.log('Update DTO:', updateDto);
+    console.log('Update DTO:', JSON.stringify(updateDto, null, 2));
 
+    // Save basic info first
+    await this.customerAnalysisRepository.save(customerAnalysis);
+
+    // Handle psychographics
     if (updateDto.psychographics) {
+      console.log('Processing Psychographics:', JSON.stringify(updateDto.psychographics, null, 2));
       const psychographicsData = updateDto.psychographics;
-      const psychographicsToSave = Array.isArray(psychographicsData) ? psychographicsData.map(p => this.psychographicsRepository.create({ ...p, customer: customerAnalysis })) : [this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis })];
-      console.log('Psychographics to Save:', psychographicsToSave);
-      if (psychographicsToSave.length > 0) {
-        await this.psychographicsRepository.save(psychographicsToSave.flat());
+      if (Array.isArray(psychographicsData)) {
+        for (const data of psychographicsData) {
+          const psychographics = this.psychographicsRepository.create({ ...data, customer: customerAnalysis });
+          console.log('Saving Psychographics:', JSON.stringify(psychographics, null, 2));
+          await this.psychographicsRepository.insert(psychographics);
+        }
+      } else {
+        const psychographics = this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis });
+        console.log('Saving Single Psychographics:', JSON.stringify(psychographics, null, 2));
+        await this.psychographicsRepository.insert(psychographics);
       }
     }
+
+    // Handle behavior
     if (updateDto.behavior) {
+      console.log('Processing Behavior:', JSON.stringify(updateDto.behavior, null, 2));
       const behaviorData = updateDto.behavior;
-      const behaviorToSave = Array.isArray(behaviorData) ? behaviorData.map(b => this.behaviorRepository.create({ ...b, customer: customerAnalysis })) : [this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis })];
-      console.log('Behavior to Save:', behaviorToSave);
-      if (behaviorToSave.length > 0) {
-        await this.behaviorRepository.save(behaviorToSave.flat());
+      if (Array.isArray(behaviorData)) {
+        for (const data of behaviorData) {
+          const behavior = this.behaviorRepository.create({ ...data, customer: customerAnalysis });
+          console.log('Saving Behavior:', JSON.stringify(behavior, null, 2));
+          await this.behaviorRepository.insert(behavior);
+        }
+      } else {
+        const behavior = this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis });
+        console.log('Saving Single Behavior:', JSON.stringify(behavior, null, 2));
+        await this.behaviorRepository.insert(behavior);
       }
     }
+
+    // Handle feedback
     if (updateDto.feedback) {
+      console.log('Processing Feedback:', JSON.stringify(updateDto.feedback, null, 2));
       const feedbackData = updateDto.feedback;
-      const feedbackToSave = Array.isArray(feedbackData) ? feedbackData.map(f => this.feedbackRepository.create({ ...f, customer: customerAnalysis })) : [this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis })];
-      console.log('Feedback to Save:', feedbackToSave);
-      if (feedbackToSave.length > 0) {
-        await this.feedbackRepository.save(feedbackToSave.flat());
+      if (Array.isArray(feedbackData)) {
+        for (const data of feedbackData) {
+          const feedback = this.feedbackRepository.create({ ...data, customer: customerAnalysis });
+          console.log('Saving Feedback:', JSON.stringify(feedback, null, 2));
+          await this.feedbackRepository.insert(feedback);
+        }
+      } else {
+        const feedback = this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis });
+        console.log('Saving Single Feedback:', JSON.stringify(feedback, null, 2));
+        await this.feedbackRepository.insert(feedback);
       }
     }
+
+    // Handle dynamic questions
     if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
+      console.log('Processing Dynamic Questions:', JSON.stringify(updateDto.dynamicQuestions, null, 2));
       for (const questionDto of updateDto.dynamicQuestions) {
         const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
-        await this.dynamicQuestionRepository.save(question);
+        console.log('Saving Dynamic Question:', JSON.stringify(question, null, 2));
+        await this.dynamicQuestionRepository.insert(question);
       }
     }
-    return await this.customerAnalysisRepository.save(customerAnalysis);
+
+    return await this.customerAnalysisRepository.findOne({ where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
   }
 
   async findAll() {
