@@ -7,6 +7,7 @@ import { CustomerPsychographics } from './entities/customer-psychographics.entit
 import { CustomerBehavior } from './entities/customer-behavior.entity';
 import { CustomerFeedback } from './entities/customer-feedback.entity';
 import { CustomerDynamicQuestion } from './entities/customer-dynamic-question.entity';
+import { getManager } from 'typeorm';
 
 @Injectable()
 export class CustomerAnalysisService {
@@ -88,71 +89,81 @@ export class CustomerAnalysisService {
 
   async updateAllInfo(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     const customerAnalysis = await this.findOne(id);
-    Object.assign(customerAnalysis, updateDto);
-    console.log('Update DTO:', JSON.stringify(updateDto, null, 2));
+    console.log('Received Update DTO:', JSON.stringify(updateDto, null, 2));
 
-    // Save basic info first
-    await this.customerAnalysisRepository.save(customerAnalysis);
+    // Update basic info in a transaction
+    await getManager().transaction(async transactionalEntityManager => {
+      Object.assign(customerAnalysis, updateDto);
+      await transactionalEntityManager.save(customerAnalysis);
+    });
 
     // Handle psychographics
     if (updateDto.psychographics) {
       console.log('Processing Psychographics:', JSON.stringify(updateDto.psychographics, null, 2));
-      const psychographicsData = updateDto.psychographics;
-      if (Array.isArray(psychographicsData)) {
-        for (const data of psychographicsData) {
-          const psychographics = this.psychographicsRepository.create({ ...data, customer: customerAnalysis });
-          console.log('Saving Psychographics:', JSON.stringify(psychographics, null, 2));
-          await this.psychographicsRepository.insert(psychographics);
+      await getManager().transaction(async transactionalEntityManager => {
+        const psychographicsData = updateDto.psychographics;
+        if (Array.isArray(psychographicsData)) {
+          for (const data of psychographicsData) {
+            const psychographics = this.psychographicsRepository.create({ ...data, customer: customerAnalysis });
+            console.log('Saving Psychographics:', JSON.stringify(psychographics, null, 2));
+            await transactionalEntityManager.save(psychographics);
+          }
+        } else {
+          const psychographics = this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis });
+          console.log('Saving Single Psychographics:', JSON.stringify(psychographics, null, 2));
+          await transactionalEntityManager.save(psychographics);
         }
-      } else {
-        const psychographics = this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis });
-        console.log('Saving Single Psychographics:', JSON.stringify(psychographics, null, 2));
-        await this.psychographicsRepository.insert(psychographics);
-      }
+      });
     }
 
     // Handle behavior
     if (updateDto.behavior) {
       console.log('Processing Behavior:', JSON.stringify(updateDto.behavior, null, 2));
-      const behaviorData = updateDto.behavior;
-      if (Array.isArray(behaviorData)) {
-        for (const data of behaviorData) {
-          const behavior = this.behaviorRepository.create({ ...data, customer: customerAnalysis });
-          console.log('Saving Behavior:', JSON.stringify(behavior, null, 2));
-          await this.behaviorRepository.insert(behavior);
+      await getManager().transaction(async transactionalEntityManager => {
+        const behaviorData = updateDto.behavior;
+        if (Array.isArray(behaviorData)) {
+          for (const data of behaviorData) {
+            const behavior = this.behaviorRepository.create({ ...data, customer: customerAnalysis });
+            console.log('Saving Behavior:', JSON.stringify(behavior, null, 2));
+            await transactionalEntityManager.save(behavior);
+          }
+        } else {
+          const behavior = this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis });
+          console.log('Saving Single Behavior:', JSON.stringify(behavior, null, 2));
+          await transactionalEntityManager.save(behavior);
         }
-      } else {
-        const behavior = this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis });
-        console.log('Saving Single Behavior:', JSON.stringify(behavior, null, 2));
-        await this.behaviorRepository.insert(behavior);
-      }
+      });
     }
 
     // Handle feedback
     if (updateDto.feedback) {
       console.log('Processing Feedback:', JSON.stringify(updateDto.feedback, null, 2));
-      const feedbackData = updateDto.feedback;
-      if (Array.isArray(feedbackData)) {
-        for (const data of feedbackData) {
-          const feedback = this.feedbackRepository.create({ ...data, customer: customerAnalysis });
-          console.log('Saving Feedback:', JSON.stringify(feedback, null, 2));
-          await this.feedbackRepository.insert(feedback);
+      await getManager().transaction(async transactionalEntityManager => {
+        const feedbackData = updateDto.feedback;
+        if (Array.isArray(feedbackData)) {
+          for (const data of feedbackData) {
+            const feedback = this.feedbackRepository.create({ ...data, customer: customerAnalysis });
+            console.log('Saving Feedback:', JSON.stringify(feedback, null, 2));
+            await transactionalEntityManager.save(feedback);
+          }
+        } else {
+          const feedback = this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis });
+          console.log('Saving Single Feedback:', JSON.stringify(feedback, null, 2));
+          await transactionalEntityManager.save(feedback);
         }
-      } else {
-        const feedback = this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis });
-        console.log('Saving Single Feedback:', JSON.stringify(feedback, null, 2));
-        await this.feedbackRepository.insert(feedback);
-      }
+      });
     }
 
     // Handle dynamic questions
     if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       console.log('Processing Dynamic Questions:', JSON.stringify(updateDto.dynamicQuestions, null, 2));
-      for (const questionDto of updateDto.dynamicQuestions) {
-        const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
-        console.log('Saving Dynamic Question:', JSON.stringify(question, null, 2));
-        await this.dynamicQuestionRepository.insert(question);
-      }
+      await getManager().transaction(async transactionalEntityManager => {
+        for (const questionDto of updateDto.dynamicQuestions) {
+          const question = this.dynamicQuestionRepository.create({ ...questionDto, customer: customerAnalysis });
+          console.log('Saving Dynamic Question:', JSON.stringify(question, null, 2));
+          await transactionalEntityManager.save(question);
+        }
+      });
     }
 
     return await this.customerAnalysisRepository.findOne({ where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
