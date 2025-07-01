@@ -89,17 +89,31 @@ export class CustomerAnalysisService {
   async updateAllInfo(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     const customerAnalysis = await this.findOne(id);
     Object.assign(customerAnalysis, updateDto);
+    console.log('Update DTO:', updateDto);
+
     if (updateDto.psychographics) {
-      const psychographicsToSave = this.psychographicsRepository.create(Array.isArray(updateDto.psychographics) ? updateDto.psychographics.map(p => ({ ...p, customer: customerAnalysis })) : [{ ...updateDto.psychographics, customer: customerAnalysis }]);
-      await this.psychographicsRepository.save(psychographicsToSave);
+      const psychographicsData = updateDto.psychographics;
+      const psychographicsToSave = Array.isArray(psychographicsData) ? psychographicsData.map(p => this.psychographicsRepository.create({ ...p, customer: customerAnalysis })) : [this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis })];
+      console.log('Psychographics to Save:', psychographicsToSave);
+      if (Array.isArray(psychographicsToSave) && psychographicsToSave.length > 0) {
+        await this.psychographicsRepository.save(psychographicsToSave.flat());
+      }
     }
     if (updateDto.behavior) {
-      const behaviorToSave = this.behaviorRepository.create(Array.isArray(updateDto.behavior) ? updateDto.behavior.map(b => ({ ...b, customer: customerAnalysis })) : [{ ...updateDto.behavior, customer: customerAnalysis }]);
-      await this.behaviorRepository.save(behaviorToSave);
+      const behaviorData = updateDto.behavior;
+      const behaviorToSave = Array.isArray(behaviorData) ? behaviorData.map(b => this.behaviorRepository.create({ ...b, customer: customerAnalysis })) : [this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis })];
+      console.log('Behavior to Save:', behaviorToSave);
+      if (Array.isArray(behaviorToSave) && behaviorToSave.length > 0) {
+        await this.behaviorRepository.save(behaviorToSave.flat());
+      }
     }
     if (updateDto.feedback) {
-      const feedbackToSave = this.feedbackRepository.create(Array.isArray(updateDto.feedback) ? updateDto.feedback.map(f => ({ ...f, customer: customerAnalysis })) : [{ ...updateDto.feedback, customer: customerAnalysis }]);
-      await this.feedbackRepository.save(feedbackToSave);
+      const feedbackData = updateDto.feedback;
+      const feedbackToSave = Array.isArray(feedbackData) ? feedbackData.map(f => this.feedbackRepository.create({ ...f, customer: customerAnalysis })) : [this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis })];
+      console.log('Feedback to Save:', feedbackToSave);
+      if (Array.isArray(feedbackToSave) && feedbackToSave.length > 0) {
+        await this.feedbackRepository.save(feedbackToSave.flat());
+      }
     }
     if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       for (const questionDto of updateDto.dynamicQuestions) {
