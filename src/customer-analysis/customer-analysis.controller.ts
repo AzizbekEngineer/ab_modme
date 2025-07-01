@@ -36,7 +36,7 @@ export class CustomerAnalysisController {
     return this.customerAnalysisService.addDynamicQuestion(id, createDynamicQuestionDto);
   }
 
-  @Patch(':id/save')
+  @Post(':id/save')
   saveAll(@Param('id') id: number, @Body() updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
     return this.customerAnalysisService.saveAll(id, updateDto);
   }
