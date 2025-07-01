@@ -46,7 +46,7 @@ export class CustomerAnalysisController {
     return this.customerAnalysisService.updateAllInfo(id, updateDto);
   }
 
-  @Get()
+  @Get("file/all")
   findAll() {
     return this.customerAnalysisService.findAll();
   }
