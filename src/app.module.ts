@@ -25,10 +25,10 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
     CacheModule.register({ isGlobal: true }),
-   TypeOrmModule.forRoot({
+    TypeOrmModule.forRoot({
   type: 'postgres',
   host: 'switchback.proxy.rlwy.net',
-  port: 5432,
+  port: 12532,
   username: 'postgres',
   password: 'kzkKIsLBmILciwKoRmbLdZPtQawOsheO',
   database: 'railway',
@@ -38,6 +38,7 @@ import { AuthModule } from './auth/auth.module';
     rejectUnauthorized: false,
   },
 }),
+
 
 
 
