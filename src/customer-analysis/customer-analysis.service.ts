@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { getManager } from 'typeorm';
 import { CustomerAnalysis } from './entities/customer-analysis.entity';
 import { CreateCustomerAnalysisDto, UpdateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
 import { CustomerPsychographics } from './entities/customer-psychographics.entity';
@@ -67,7 +66,7 @@ export class CustomerAnalysisService {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
 
-    return await getManager().transaction(async transactionalEntityManager => {
+    return await this.customerAnalysisRepository.manager.transaction(async transactionalEntityManager => {
       // Update basic info using QueryBuilder
       await transactionalEntityManager.createQueryBuilder()
         .update(CustomerAnalysis)
