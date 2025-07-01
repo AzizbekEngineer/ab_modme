@@ -37,29 +37,45 @@ export class CustomerAnalysisService {
   async addPsychographics(analysisId: number, createPsychographicsDto: CreateCustomerPsychographicsDto) {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const psychographics = this.psychographicsRepository.create({ ...createPsychographicsDto, customer: { id: customerAnalysis.id } });
-    return await this.psychographicsRepository.save(psychographics);
+    const existing = await this.psychographicsRepository.findOne({ where: { customer: { id: analysisId } } });
+    if (!existing) {
+      const psychographics = this.psychographicsRepository.create({ ...createPsychographicsDto, customer: { id: customerAnalysis.id } });
+      return await this.psychographicsRepository.save(psychographics);
+    }
+    return existing;
   }
 
   async addBehavior(analysisId: number, createBehaviorDto: CreateCustomerBehaviorDto) {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const behavior = this.behaviorRepository.create({ ...createBehaviorDto, customer: { id: customerAnalysis.id } });
-    return await this.behaviorRepository.save(behavior);
+    const existing = await this.behaviorRepository.findOne({ where: { customer: { id: analysisId } } });
+    if (!existing) {
+      const behavior = this.behaviorRepository.create({ ...createBehaviorDto, customer: { id: customerAnalysis.id } });
+      return await this.behaviorRepository.save(behavior);
+    }
+    return existing;
   }
 
   async addFeedback(analysisId: number, createFeedbackDto: CreateCustomerFeedbackDto) {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const feedback = this.feedbackRepository.create({ ...createFeedbackDto, customer: { id: customerAnalysis.id } });
-    return await this.feedbackRepository.save(feedback);
+    const existing = await this.feedbackRepository.findOne({ where: { customer: { id: analysisId } } });
+    if (!existing) {
+      const feedback = this.feedbackRepository.create({ ...createFeedbackDto, customer: { id: customerAnalysis.id } });
+      return await this.feedbackRepository.save(feedback);
+    }
+    return existing;
   }
 
   async addDynamicQuestion(analysisId: number, createDynamicQuestionDto: CreateCustomerDynamicQuestionDto) {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const question = this.dynamicQuestionRepository.create({ ...createDynamicQuestionDto, customer: { id: customerAnalysis.id } });
-    return await this.dynamicQuestionRepository.save(question);
+    const existing = await this.dynamicQuestionRepository.findOne({ where: { customer: { id: analysisId }, question: createDynamicQuestionDto.question } });
+    if (!existing) {
+      const question = this.dynamicQuestionRepository.create({ ...createDynamicQuestionDto, customer: { id: customerAnalysis.id } });
+      return await this.dynamicQuestionRepository.save(question);
+    }
+    return existing;
   }
 
   async saveAll(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
@@ -67,7 +83,6 @@ export class CustomerAnalysisService {
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
 
     return await this.customerAnalysisRepository.manager.transaction(async transactionalEntityManager => {
-      // Update basic info using QueryBuilder
       await transactionalEntityManager.createQueryBuilder()
         .update(CustomerAnalysis)
         .set({
@@ -90,50 +105,58 @@ export class CustomerAnalysisService {
         .where("id = :id", { id })
         .execute();
 
-      // Handle psychographics
       if (updateDto.psychographics) {
         const psychographicsData = Array.isArray(updateDto.psychographics) ? updateDto.psychographics : [updateDto.psychographics];
         for (const data of psychographicsData) {
-          await transactionalEntityManager.createQueryBuilder()
-            .insert()
-            .into(CustomerPsychographics)
-            .values({ ...data, customer: { id } })
-            .execute();
+          const existing = await transactionalEntityManager.findOne(CustomerPsychographics, { where: { customer: { id } } });
+          if (!existing) {
+            await transactionalEntityManager.createQueryBuilder()
+              .insert()
+              .into(CustomerPsychographics)
+              .values({ ...data, customer: { id } })
+              .execute();
+          }
         }
       }
 
-      // Handle behavior
       if (updateDto.behavior) {
         const behaviorData = Array.isArray(updateDto.behavior) ? updateDto.behavior : [updateDto.behavior];
         for (const data of behaviorData) {
-          await transactionalEntityManager.createQueryBuilder()
-            .insert()
-            .into(CustomerBehavior)
-            .values({ ...data, customer: { id } })
-            .execute();
+          const existing = await transactionalEntityManager.findOne(CustomerBehavior, { where: { customer: { id } } });
+          if (!existing) {
+            await transactionalEntityManager.createQueryBuilder()
+              .insert()
+              .into(CustomerBehavior)
+              .values({ ...data, customer: { id } })
+              .execute();
+          }
         }
       }
 
-      // Handle feedback
       if (updateDto.feedback) {
         const feedbackData = Array.isArray(updateDto.feedback) ? updateDto.feedback : [updateDto.feedback];
         for (const data of feedbackData) {
-          await transactionalEntityManager.createQueryBuilder()
-            .insert()
-            .into(CustomerFeedback)
-            .values({ ...data, customer: { id } })
-            .execute();
+          const existing = await transactionalEntityManager.findOne(CustomerFeedback, { where: { customer: { id } } });
+          if (!existing) {
+            await transactionalEntityManager.createQueryBuilder()
+              .insert()
+              .into(CustomerFeedback)
+              .values({ ...data, customer: { id } })
+              .execute();
+          }
         }
       }
 
-      // Handle dynamic questions
       if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
         for (const questionDto of updateDto.dynamicQuestions) {
-          await transactionalEntityManager.createQueryBuilder()
-            .insert()
-            .into(CustomerDynamicQuestion)
-            .values({ ...questionDto, customer: { id } })
-            .execute();
+          const existing = await transactionalEntityManager.findOne(CustomerDynamicQuestion, { where: { customer: { id }, question: questionDto.question } });
+          if (!existing) {
+            await transactionalEntityManager.createQueryBuilder()
+              .insert()
+              .into(CustomerDynamicQuestion)
+              .values({ ...questionDto, customer: { id } })
+              .execute();
+          }
         }
       }
 
@@ -145,7 +168,6 @@ export class CustomerAnalysisService {
     const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id } });
     if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
 
-    // Update basic info using QueryBuilder
     await this.customerAnalysisRepository.createQueryBuilder()
       .update(CustomerAnalysis)
       .set({
@@ -168,50 +190,58 @@ export class CustomerAnalysisService {
       .where("id = :id", { id })
       .execute();
 
-    // Handle psychographics
     if (updateDto.psychographics) {
       const psychographicsData = Array.isArray(updateDto.psychographics) ? updateDto.psychographics : [updateDto.psychographics];
       for (const data of psychographicsData) {
-        await this.psychographicsRepository.createQueryBuilder()
-          .insert()
-          .into(CustomerPsychographics)
-          .values({ ...data, customer: { id } })
-          .execute();
+        const existing = await this.psychographicsRepository.findOne({ where: { customer: { id } } });
+        if (!existing) {
+          await this.psychographicsRepository.createQueryBuilder()
+            .insert()
+            .into(CustomerPsychographics)
+            .values({ ...data, customer: { id } })
+            .execute();
+        }
       }
     }
 
-    // Handle behavior
     if (updateDto.behavior) {
       const behaviorData = Array.isArray(updateDto.behavior) ? updateDto.behavior : [updateDto.behavior];
       for (const data of behaviorData) {
-        await this.behaviorRepository.createQueryBuilder()
-          .insert()
-          .into(CustomerBehavior)
-          .values({ ...data, customer: { id } })
-          .execute();
+        const existing = await this.behaviorRepository.findOne({ where: { customer: { id } } });
+        if (!existing) {
+          await this.behaviorRepository.createQueryBuilder()
+            .insert()
+            .into(CustomerBehavior)
+            .values({ ...data, customer: { id } })
+            .execute();
+        }
       }
     }
 
-    // Handle feedback
     if (updateDto.feedback) {
       const feedbackData = Array.isArray(updateDto.feedback) ? updateDto.feedback : [updateDto.feedback];
       for (const data of feedbackData) {
-        await this.feedbackRepository.createQueryBuilder()
-          .insert()
-          .into(CustomerFeedback)
-          .values({ ...data, customer: { id } })
-          .execute();
+        const existing = await this.feedbackRepository.findOne({ where: { customer: { id } } });
+        if (!existing) {
+          await this.feedbackRepository.createQueryBuilder()
+            .insert()
+            .into(CustomerFeedback)
+            .values({ ...data, customer: { id } })
+            .execute();
+        }
       }
     }
 
-    // Handle dynamic questions
     if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
       for (const questionDto of updateDto.dynamicQuestions) {
-        await this.dynamicQuestionRepository.createQueryBuilder()
-          .insert()
-          .into(CustomerDynamicQuestion)
-          .values({ ...questionDto, customer: { id } })
-          .execute();
+        const existing = await this.dynamicQuestionRepository.findOne({ where: { customer: { id }, question: questionDto.question } });
+        if (!existing) {
+          await this.dynamicQuestionRepository.createQueryBuilder()
+            .insert()
+            .into(CustomerDynamicQuestion)
+            .values({ ...questionDto, customer: { id } })
+            .execute();
+        }
       }
     }
 
