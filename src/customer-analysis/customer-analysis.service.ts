@@ -95,7 +95,7 @@ export class CustomerAnalysisService {
       const psychographicsData = updateDto.psychographics;
       const psychographicsToSave = Array.isArray(psychographicsData) ? psychographicsData.map(p => this.psychographicsRepository.create({ ...p, customer: customerAnalysis })) : [this.psychographicsRepository.create({ ...psychographicsData, customer: customerAnalysis })];
       console.log('Psychographics to Save:', psychographicsToSave);
-      if (Array.isArray(psychographicsToSave) && psychographicsToSave.length > 0) {
+      if (psychographicsToSave.length > 0) {
         await this.psychographicsRepository.save(psychographicsToSave.flat());
       }
     }
@@ -103,7 +103,7 @@ export class CustomerAnalysisService {
       const behaviorData = updateDto.behavior;
       const behaviorToSave = Array.isArray(behaviorData) ? behaviorData.map(b => this.behaviorRepository.create({ ...b, customer: customerAnalysis })) : [this.behaviorRepository.create({ ...behaviorData, customer: customerAnalysis })];
       console.log('Behavior to Save:', behaviorToSave);
-      if (Array.isArray(behaviorToSave) && behaviorToSave.length > 0) {
+      if (behaviorToSave.length > 0) {
         await this.behaviorRepository.save(behaviorToSave.flat());
       }
     }
@@ -111,7 +111,7 @@ export class CustomerAnalysisService {
       const feedbackData = updateDto.feedback;
       const feedbackToSave = Array.isArray(feedbackData) ? feedbackData.map(f => this.feedbackRepository.create({ ...f, customer: customerAnalysis })) : [this.feedbackRepository.create({ ...feedbackData, customer: customerAnalysis })];
       console.log('Feedback to Save:', feedbackToSave);
-      if (Array.isArray(feedbackToSave) && feedbackToSave.length > 0) {
+      if (feedbackToSave.length > 0) {
         await this.feedbackRepository.save(feedbackToSave.flat());
       }
     }
