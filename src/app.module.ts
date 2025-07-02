@@ -33,7 +33,7 @@ import { AuthModule } from './auth/auth.module';
   password: 'kzkKIsLBmILciwKoRmbLdZPtQawOsheO',
   database: 'railway',
   autoLoadEntities: true,
-  synchronize: true,
+  synchronize: false,
   ssl: {
     rejectUnauthorized: false,
   },
