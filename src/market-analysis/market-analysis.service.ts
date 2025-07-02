@@ -21,46 +21,22 @@ export class MarketAnalysisService {
   ) {}
 
   async createFile(createMarketFileDto: CreateMarketFileDto) {
-    const file = this.marketFileRepository.create(createMarketFileDto);
+    const file = this.marketFileRepository.create({
+      ...createMarketFileDto,
+      volumes: [],
+      tags: [],
+      pestleAnalyses: []
+    });
     return await this.marketFileRepository.save(file);
   }
 
-  async addVolumeToFile(fileId: number, marketVolumeDto: MarketVolumeDto) {
-    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
+  async saveAll(fileId: number, saveAllDto: SaveAllDto) {
+    const file = await this.marketFileRepository.findOne({ where: { id: fileId }, relations: ['volumes', 'tags', 'pestleAnalyses'] });
     if (!file) throw new NotFoundException('File not found');
-    const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: marketVolumeDto.analysisType, value: marketVolumeDto.value, marketFile: { id: fileId } } });
-    if (existingVolume) {
-      return existingVolume;
-    }
-    const volume = this.marketVolumeRepository.create({ ...marketVolumeDto, marketFile: file });
-    return await this.marketVolumeRepository.save(volume);
-  }
 
-  async addTagToFile(fileId: number, createMarketTagDto: CreateMarketTagDto) {
-    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
-    if (!file) throw new NotFoundException('File not found');
-    const existingTag = await this.marketTagRepository.findOne({ where: { tagName: createMarketTagDto.tagName, marketFile: { id: fileId } } });
-    if (existingTag) {
-      return existingTag;
+    if (saveAllDto.fileName) {
+      file.fileName = saveAllDto.fileName;
     }
-    const tag = this.marketTagRepository.create({ ...createMarketTagDto, marketFile: file });
-    return await this.marketTagRepository.save(tag);
-  }
-
-  async addPestleToFile(fileId: number, createPestleAnalysisDto: CreatePestleAnalysisDto) {
-    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
-    if (!file) throw new NotFoundException('File not found');
-    const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: createPestleAnalysisDto.category, marketFile: { id: fileId } } });
-    if (existingPestle) {
-      return existingPestle;
-    }
-    const pestle = this.pestleAnalysisRepository.create({ ...createPestleAnalysisDto, marketFile: file });
-    return await this.pestleAnalysisRepository.save(pestle);
-  }
-
-  async saveAllToFile(fileId: number, saveAllDto: SaveAllDto) {
-    const file = await this.marketFileRepository.findOne({ where: { id: fileId } });
-    if (!file) throw new NotFoundException('File not found');
     if (saveAllDto.volumes && saveAllDto.volumes.length > 0) {
       for (const volume of saveAllDto.volumes) {
         const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: volume.analysisType, value: volume.value, marketFile: { id: fileId } } });
@@ -88,16 +64,14 @@ export class MarketAnalysisService {
         }
       }
     }
-    if (saveAllDto.files && saveAllDto.files.length > 0) {
-      for (const newFileData of saveAllDto.files) {
-        const existingFile = await this.marketFileRepository.findOne({ where: { id: fileId } });
-        if (existingFile) {
-          existingFile.fileName = newFileData.fileName || existingFile.fileName; // File nomini yangilash
-          await this.marketFileRepository.save(existingFile);
-        }
-      }
-    }
+
     return await this.findOneFile(fileId);
+  }
+
+  async findAllFiles() {
+    return await this.marketFileRepository.find({
+      select: ['id', 'fileName', 'createdAt', 'lastSavedAt'],
+    });
   }
 
   async findOneFile(fileId: number) {
@@ -131,17 +105,6 @@ export class MarketAnalysisService {
     });
     if (!file) throw new NotFoundException('File not found');
     return file;
-  }
-
-  async findAllFiles() {
-    return await this.marketFileRepository.find({
-      select: {
-        id: true,
-        fileName: true,
-        createdAt: true,
-        lastSavedAt: true,
-      },
-    });
   }
 
   async updateFile(fileId: number, updateMarketFileDto: UpdateMarketFileDto) {
