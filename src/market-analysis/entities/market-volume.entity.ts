@@ -7,7 +7,7 @@ export class MarketVolume {
   id: number;
 
   @Column({ type: 'varchar', length: 50 })
-  analysisType: string; // PAM, TAM, SAM, SOM
+  analysisType: string; 
 
   @Column({ type: 'numeric', precision: 15, scale: 2 })
   value: number;
@@ -19,7 +19,7 @@ export class MarketVolume {
   description?: string;
 
   @Column({ type: 'varchar', length: 10, nullable: true })
-  currency?: string; // so'm yoki dollar
+  currency?: string; 
 
   @ManyToOne(() => MarketFile, file => file.volumes, { onDelete: 'CASCADE' })
   marketFile: MarketFile;
