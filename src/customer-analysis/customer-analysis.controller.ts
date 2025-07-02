@@ -51,10 +51,12 @@ export class CustomerAnalysisController {
     return this.customerAnalysisService.findAll();
   }
 
+  
   @Get(':id')
   findOne(@Param('id') id: number) {
     return this.customerAnalysisService.findOne(id);
   }
+
 
   @Delete(':id')
   remove(@Param('id') id: number) {
