@@ -39,9 +39,6 @@ import { AuthModule } from './auth/auth.module';
   },
 }),
 
-
-
-
     UsersModule,
     CoursesModule,
     GroupsModule,
