@@ -20,11 +20,13 @@ export class MarketAnalysisController {
   findAllFiles() {
     return this.marketAnalysisService.findAllFiles();
   }
+  
 
   @Get('file/:fileId')
   findOneFile(@Param('fileId') fileId: number) {
     return this.marketAnalysisService.findOneFile(fileId);
   }
+
 
   @Put('file/:fileId')
   updateFile(@Param('fileId') fileId: number, @Body() updateMarketFileDto: UpdateMarketFileDto) {
