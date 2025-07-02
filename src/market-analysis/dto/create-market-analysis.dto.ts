@@ -60,6 +60,10 @@ export class CreatePestleAnalysisDto {
 }
 
 export class SaveAllDto {
+  @IsString()
+  @IsOptional()
+  fileName?: string;
+
   @IsArray()
   @IsOptional()
   volumes?: MarketVolumeDto[];
@@ -71,8 +75,4 @@ export class SaveAllDto {
   @IsArray()
   @IsOptional()
   pestle?: CreatePestleAnalysisDto[];
-
-  @IsArray()
-  @IsOptional()
-  files?: CreateMarketFileDto[];
 }
