@@ -20,6 +20,7 @@ import { CompetitorAnalysisModule } from './competitor-analysis/competitor-analy
 import { CourseAnalysisModule } from './course-analysis/course-analysis.module';
 import { CustomerPersonaModule } from './customer-persona/customer-persona.module';
 import { AuthModule } from './auth/auth.module';
+import { truncate } from 'fs';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { AuthModule } from './auth/auth.module';
   password: 'kzkKIsLBmILciwKoRmbLdZPtQawOsheO',
   database: 'railway',
   autoLoadEntities: true,
-  synchronize: false,
+  synchronize: true,
   ssl: {
     rejectUnauthorized: false,
   },
