@@ -134,65 +134,78 @@ export class MarketAnalysisService {
 }
 
   async updateAll(fileId: number, dto: UpdateAllDto) {
-    const file = await this.marketFileRepository.findOne({
-      where: { id: fileId },
-      relations: ['volumes', 'tags', 'pestleAnalyses'],
-    });
-    if (!file) throw new NotFoundException('File not found');
+  const file = await this.marketFileRepository.findOne({
+    where: { id: fileId },
+    relations: ['volumes', 'tags', 'pestleAnalyses'],
+  });
+  if (!file) throw new NotFoundException('File not found');
 
-    if (dto.fileName) {
-      file.fileName = dto.fileName;
-      file.lastSavedAt = new Date();
-      await this.marketFileRepository.save(file);
-    }
-
-    if (dto.volumes) {
-      for (const volume of dto.volumes) {
-        const existingVolume = await this.marketVolumeRepository.findOne({
-          where: { category: volume.category, marketFile: { id: fileId } },
-        });
-        if (existingVolume) {
-          Object.assign(existingVolume, volume);
-          await this.marketVolumeRepository.save(existingVolume);
-        } else {
-          const newVolume = this.marketVolumeRepository.create({ ...volume, marketFile: file });
-          await this.marketVolumeRepository.save(newVolume);
-        }
-      }
-    }
-
-    if (dto.tags) {
-      for (const tag of dto.tags) {
-        const existingTag = await this.marketTagRepository.findOne({
-          where: { tagName: tag.tagName, marketFile: { id: fileId } },
-        });
-        if (!existingTag) {
-          const newTag = this.marketTagRepository.create({ ...tag, marketFile: file });
-          await this.marketTagRepository.save(newTag);
-        }
-      }
-    }
-
-    if (dto.pestle) {
-      for (const pestle of dto.pestle) {
-        const existingPestle = await this.pestleAnalysisRepository.findOne({
-          where: { category: pestle.category, marketFile: { id: fileId } },
-        });
-        if (existingPestle) {
-          Object.assign(existingPestle, pestle);
-          await this.pestleAnalysisRepository.save(existingPestle);
-        } else {
-          const newPestle = this.pestleAnalysisRepository.create({ ...pestle, marketFile: file });
-          await this.pestleAnalysisRepository.save(newPestle);
-        }
-      }
-    }
-
+  if (dto.fileName) {
+    file.fileName = dto.fileName;
     file.lastSavedAt = new Date();
     await this.marketFileRepository.save(file);
-
-    return await this.findOneFile(fileId);
   }
+
+  if (dto.volumes?.length) {
+    const allExistingVolumes = await this.marketVolumeRepository.find({
+      where: { marketFile: { id: fileId } },
+    });
+
+    for (const volume of dto.volumes) {
+      const existing = allExistingVolumes.find(
+        (v) => v.category.trim().toLowerCase() === volume.category.trim().toLowerCase()
+      );
+      if (existing) {
+        Object.assign(existing, volume);
+        await this.marketVolumeRepository.save(existing);
+      } else {
+        const newVolume = this.marketVolumeRepository.create({ ...volume, marketFile: file });
+        await this.marketVolumeRepository.save(newVolume);
+      }
+    }
+  }
+
+  if (dto.tags?.length) {
+    const allExistingTags = await this.marketTagRepository.find({
+      where: { marketFile: { id: fileId } },
+    });
+
+    for (const tag of dto.tags) {
+      const exists = allExistingTags.find(
+        (t) => t.tagName.trim().toLowerCase() === tag.tagName.trim().toLowerCase()
+      );
+      if (!exists) {
+        const newTag = this.marketTagRepository.create({ ...tag, marketFile: file });
+        await this.marketTagRepository.save(newTag);
+      }
+    }
+  }
+
+  if (dto.pestle?.length) {
+    const allExistingPestles = await this.pestleAnalysisRepository.find({
+      where: { marketFile: { id: fileId } },
+    });
+
+    for (const pestle of dto.pestle) {
+      const existing = allExistingPestles.find(
+        (p) => p.category.trim().toLowerCase() === pestle.category.trim().toLowerCase()
+      );
+      if (existing) {
+        Object.assign(existing, pestle);
+        await this.pestleAnalysisRepository.save(existing);
+      } else {
+        const newPestle = this.pestleAnalysisRepository.create({ ...pestle, marketFile: file });
+        await this.pestleAnalysisRepository.save(newPestle);
+      }
+    }
+  }
+
+  file.lastSavedAt = new Date();
+  await this.marketFileRepository.save(file);
+
+  return await this.findOneFile(fileId);
+}
+
 
   async findAllFiles() {
     return await this.marketFileRepository.find({
