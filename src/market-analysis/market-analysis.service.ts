@@ -13,6 +13,7 @@ const dataMarketing = {
   lastSavedAt: new Date(),
   volumes: [
     {
+      id: 1,
       category: "Potensional bozor hajmi",
       description: "siz maxsulot/xizmatlaringizni sotish uchun potensional bozor hajmi",
       percentage: 0,
@@ -20,6 +21,7 @@ const dataMarketing = {
       currency: "",
     },
     {
+      id: 2,
       category: "Umumiy bozor hajmi",
       description: "siz maxsulot/xizmatlaringizni sotish uchun umumiy bozor",
       percentage: 0,
@@ -27,6 +29,7 @@ const dataMarketing = {
       currency: "",
     },
     {
+      id: 3,
       category: "Xizmat ko'rsatish mavjud bo'lgan bozor hajmi",
       description: "Sizning geografik joylashuvingizda mavjud bozor hajmi",
       percentage: 0,
@@ -34,6 +37,7 @@ const dataMarketing = {
       currency: "",
     },
     {
+      id: 4,
       category: "Siz olishingiz mumkin bo'lgan bozor hajmi",
       description: "",
       percentage: 0,
@@ -43,31 +47,37 @@ const dataMarketing = {
   ],
   pestleAnalyses: [
     {
+      id: 1,
       category: "Siyosiy (Political)",
       analysis: "",
       impact: "",
     },
     {
+      id: 2,
       category: "Iqtisodiy (Economic)",
       analysis: "",
       impact: "",
     },
     {
+      id: 3,
       category: "Ijtimoiy (Social)",
       analysis: "",
       impact: "",
     },
     {
+      id: 4,
       category: "Texnologik (Technological)",
       analysis: "",
       impact: "",
     },
     {
+      id: 5,
       category: "Qonuniy (Legal)",
       analysis: "",
       impact: "",
     },
     {
+      id: 6,
       category: "Ekologik (Ecological)",
       analysis: "",
       impact: "",
@@ -89,49 +99,39 @@ export class MarketAnalysisService {
   ) {}
 
   async createFile(createMarketFileDto: CreateMarketFileDto) {
-    const queryRunner = this.marketFileRepository.manager.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  const file = this.marketFileRepository.create({
+    fileName: createMarketFileDto.fileName,
+    createdAt: new Date(),
+    lastSavedAt: new Date(),
+  });
+  const savedFile = await this.marketFileRepository.save(file);
 
-    try {
-      const file = this.marketFileRepository.create({
-        ...createMarketFileDto,
-        createdAt: dataMarketing.createdAt,
-        lastSavedAt: dataMarketing.lastSavedAt,
-      });
-      const savedFile = await queryRunner.manager.save(MarketFile, file);
-      const volumes = dataMarketing.volumes.map((v) =>
-        this.marketVolumeRepository.create({
-          category: v.category,
-          value: v.value,
-          percentage: v.percentage,
-          description: v.description,
-          currency: v.currency,
-          marketFile: savedFile,
-        })
-      );
-      await queryRunner.manager.save(MarketVolume, volumes);
+  const volumeEntities = dataMarketing.volumes.map((v) =>
+    this.marketVolumeRepository.create({
+      category: v.category,
+      value: v.value,
+      percentage: v.percentage,
+      description: v.description,
+      currency: v.currency,
+      marketFile: savedFile,
+    })
+  );
+  await this.marketVolumeRepository.save(volumeEntities);
 
-      const pestleAnalyses = dataMarketing.pestleAnalyses.map((p) =>
-        this.pestleAnalysisRepository.create({
-          category: p.category,
-          analysis: p.analysis,
-          impact: p.impact,
-          marketFile: savedFile,
-        })
-      );
-      await queryRunner.manager.save(PestleAnalysis, pestleAnalyses);
-
-      await queryRunner.commitTransaction();
-
-      return await this.findOneFile(savedFile.id);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-  }
+  const pestleEntities = dataMarketing.pestleAnalyses.map((p) =>
+    this.pestleAnalysisRepository.create({
+      category: p.category,
+      analysis: p.analysis,
+      impact: p.impact,
+      marketFile: savedFile,
+    })
+  );
+  await this.pestleAnalysisRepository.save(pestleEntities);
+  return this.marketFileRepository.findOne({
+    where: { id: savedFile.id },
+    relations: ['volumes', 'tags', 'pestleAnalyses'],
+  });
+}
 
   async updateAll(fileId: number, dto: UpdateAllDto) {
     const file = await this.marketFileRepository.findOne({
