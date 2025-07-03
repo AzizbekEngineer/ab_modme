@@ -99,35 +99,49 @@ export class MarketAnalysisService {
   ) {}
 
   async createFile(createMarketFileDto: CreateMarketFileDto) {
-    const file = this.marketFileRepository.create({
-      ...createMarketFileDto,
-      createdAt: dataMarketing.createdAt,
-      lastSavedAt: dataMarketing.lastSavedAt,
-    });
+    const queryRunner = this.marketFileRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
-    const volumes = dataMarketing.volumes.map((v) =>
-      this.marketVolumeRepository.create({
-        category: v.category,
-        value: v.value,
-        percentage: v.percentage,
-        description: v.description,
-        currency: v.currency,
-        marketFile: file,
-      })
-    );
-    file.volumes = volumes;
+    try {
+      const file = this.marketFileRepository.create({
+        ...createMarketFileDto,
+        createdAt: dataMarketing.createdAt,
+        lastSavedAt: dataMarketing.lastSavedAt,
+      });
 
-    const pestleAnalyses = dataMarketing.pestleAnalyses.map((p) =>
-      this.pestleAnalysisRepository.create({
-        category: p.category,
-        analysis: p.analysis,
-        impact: p.impact,
-        marketFile: file,
-      })
-    );
-    file.pestleAnalyses = pestleAnalyses;
-    
-    return await this.marketFileRepository.save(file);
+      const volumes = dataMarketing.volumes.map((v) =>
+        this.marketVolumeRepository.create({
+          category: v.category,
+          value: v.value,
+          percentage: v.percentage,
+          description: v.description,
+          currency: v.currency,
+          marketFile: file,
+        })
+      );
+      file.volumes = volumes;
+
+      const pestleAnalyses = dataMarketing.pestleAnalyses.map((p) =>
+        this.pestleAnalysisRepository.create({
+          category: p.category,
+          analysis: p.analysis,
+          impact: p.impact,
+          marketFile: file,
+        })
+      );
+      file.pestleAnalyses = pestleAnalyses;
+
+      const savedFile = await queryRunner.manager.save(MarketFile, file);
+      await queryRunner.commitTransaction();
+
+      return savedFile;
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async updateAll(fileId: number, dto: UpdateAllDto) {
