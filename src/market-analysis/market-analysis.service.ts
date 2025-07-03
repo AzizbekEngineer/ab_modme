@@ -5,7 +5,7 @@ import { MarketFile } from './entities/market-file.entity';
 import { MarketVolume } from './entities/market-volume.entity';
 import { MarketTag } from './entities/market-tag.entity';
 import { PestleAnalysis } from './entities/pestle-analysis.entity';
-import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, SaveAllDto, UpdateMarketFileDto } from './dto/create-market-analysis.dto';
+import { CreateMarketFileDto, MarketVolumeDto, CreateMarketTagDto, CreatePestleAnalysisDto, UpdateAllDto, UpdateMarketFileDto } from './dto/create-market-analysis.dto';
 
 @Injectable()
 export class MarketAnalysisService {
@@ -30,15 +30,15 @@ export class MarketAnalysisService {
     return await this.marketFileRepository.save(file);
   }
 
-  async saveAll(fileId: number, saveAllDto: SaveAllDto) {
+  async updateAll(fileId: number, UpdateAllDto: UpdateAllDto) {
     const file = await this.marketFileRepository.findOne({ where: { id: fileId }, relations: ['volumes', 'tags', 'pestleAnalyses'] });
     if (!file) throw new NotFoundException('File not found');
 
-    if (saveAllDto.fileName) {
-      file.fileName = saveAllDto.fileName;
+    if (UpdateAllDto.fileName) {
+      file.fileName = UpdateAllDto.fileName;
     }
-    if (saveAllDto.volumes && saveAllDto.volumes.length > 0) {
-      for (const volume of saveAllDto.volumes) {
+    if (UpdateAllDto.volumes && UpdateAllDto.volumes.length > 0) {
+      for (const volume of UpdateAllDto.volumes) {
         const existingVolume = await this.marketVolumeRepository.findOne({ where: { analysisType: volume.analysisType, value: volume.value, marketFile: { id: fileId } } });
         if (!existingVolume) {
           const newVolume = this.marketVolumeRepository.create({ ...volume, marketFile: file });
@@ -46,8 +46,8 @@ export class MarketAnalysisService {
         }
       }
     }
-    if (saveAllDto.tags && saveAllDto.tags.length > 0) {
-      for (const tag of saveAllDto.tags) {
+    if (UpdateAllDto.tags && UpdateAllDto.tags.length > 0) {
+      for (const tag of UpdateAllDto.tags) {
         const existingTag = await this.marketTagRepository.findOne({ where: { tagName: tag.tagName, marketFile: { id: fileId } } });
         if (!existingTag) {
           const newTag = this.marketTagRepository.create({ ...tag, marketFile: file });
@@ -55,8 +55,8 @@ export class MarketAnalysisService {
         }
       }
     }
-    if (saveAllDto.pestle && saveAllDto.pestle.length > 0) {
-      for (const pestle of saveAllDto.pestle) {
+    if (UpdateAllDto.pestle && UpdateAllDto.pestle.length > 0) {
+      for (const pestle of UpdateAllDto.pestle) {
         const existingPestle = await this.pestleAnalysisRepository.findOne({ where: { category: pestle.category, marketFile: { id: fileId } } });
         if (!existingPestle) {
           const newPestle = this.pestleAnalysisRepository.create({ ...pestle, marketFile: file });

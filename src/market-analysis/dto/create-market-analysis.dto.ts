@@ -59,7 +59,7 @@ export class CreatePestleAnalysisDto {
   impact?: string;
 }
 
-export class SaveAllDto {
+export class UpdateAllDto {
   @IsString()
   @IsOptional()
   fileName?: string;
