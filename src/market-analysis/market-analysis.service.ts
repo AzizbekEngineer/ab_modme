@@ -29,7 +29,6 @@ export class MarketAnalysisService {
     });
     return await this.marketFileRepository.save(file);
   }
-  \
 async updateAll(fileId: number, dto: UpdateAllDto) {
   const file = await this.marketFileRepository.findOne({
     where: { id: fileId },
