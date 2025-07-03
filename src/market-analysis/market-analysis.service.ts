@@ -105,25 +105,38 @@ export class MarketAnalysisService {
       lastSavedAt: dataMarketing.lastSavedAt,
     });
 
-    const volumes = dataMarketing.volumes.map((v, index) =>
+    // Volumes ni alohida tayyorlash
+    const volumes = dataMarketing.volumes.map((v) =>
       this.marketVolumeRepository.create({
-        ...v,
-        id: undefined, 
+        category: v.category,
+        value: v.value,
+        percentage: v.percentage,
+        description: v.description,
+        currency: v.currency,
         marketFile: file,
       })
     );
     file.volumes = volumes;
 
-    const pestleAnalyses = dataMarketing.pestleAnalyses.map((p, index) =>
+    // PestleAnalyses ni alohida tayyorlash
+    const pestleAnalyses = dataMarketing.pestleAnalyses.map((p) =>
       this.pestleAnalysisRepository.create({
-        ...p,
-        id: undefined,
+        category: p.category,
+        analysis: p.analysis,
+        impact: p.impact,
         marketFile: file,
       })
     );
     file.pestleAnalyses = pestleAnalyses;
 
-    return await this.marketFileRepository.save(file);
+    // File ni saqlash
+    const savedFile = await this.marketFileRepository.save(file);
+
+    // Bog‘liq entitylarni alohida saqlash (agar kerak bo‘lsa, lekin cascade ishlaydi)
+    await this.marketVolumeRepository.save(volumes);
+    await this.pestleAnalysisRepository.save(pestleAnalyses);
+
+    return savedFile;
   }
 
   async updateAll(fileId: number, dto: UpdateAllDto) {
