@@ -140,12 +140,15 @@ export class MarketAnalysisService {
   });
 
   if (!file) throw new NotFoundException('File not found');
+
+  // File nomini yangilash
   if (dto.fileName) {
     file.fileName = dto.fileName;
   }
   file.lastSavedAt = new Date();
   await this.marketFileRepository.save(file);
 
+  // ==== VOLUMES ====
   if (dto.volumes?.length) {
     const existingVolumes = await this.marketVolumeRepository.find({
       where: { marketFile: { id: fileId } },
@@ -169,6 +172,7 @@ export class MarketAnalysisService {
     }
   }
 
+  // ==== TAGS ====
   if (dto.tags?.length) {
     const existingTags = await this.marketTagRepository.find({
       where: { marketFile: { id: fileId } },
@@ -188,6 +192,7 @@ export class MarketAnalysisService {
     }
   }
 
+  // ==== PESTLE ANALYSES ====
   if (dto.pestle?.length) {
     const existingPestles = await this.pestleAnalysisRepository.find({
       where: { marketFile: { id: fileId } },
@@ -211,9 +216,17 @@ export class MarketAnalysisService {
     }
   }
 
+  // Oxirgi holatini qaytaramiz
   return await this.findOneFile(fileId);
 }
 
+
+
+  async findAllFiles() {
+    return await this.marketFileRepository.find({
+      select: ['id', 'fileName', 'createdAt', 'lastSavedAt'],
+    });
+  }
 
   async findOneFile(fileId: number) {
     const file = await this.marketFileRepository.findOne({
