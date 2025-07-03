@@ -20,7 +20,7 @@ export class UpdateMarketFileDto {
 export class MarketVolumeDto {
   @IsString()
   @IsNotEmpty()
-  analysisType: string;
+  category: string;
 
   @IsNumber()
   @IsNotEmpty()
