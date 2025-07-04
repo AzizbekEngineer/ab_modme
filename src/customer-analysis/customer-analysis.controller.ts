@@ -1,63 +1,64 @@
-import { Controller, Post, Body, Get, Param, Put, Delete, Patch } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, NotFoundException } from '@nestjs/common';
 import { CustomerAnalysisService } from './customer-analysis.service';
-import { CreateCustomerAnalysisDto, UpdateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
+import { CreateCustomerAnalysisDto, AddSectionDto, AddQuestionDto, AddCompanyDto, UpdateCompanyNameDto } from './dto/create-customer-analysis.dto';
 
 @Controller('customer-analysis')
 export class CustomerAnalysisController {
   constructor(private readonly customerAnalysisService: CustomerAnalysisService) {}
 
-  @Post()
-  create(@Body() createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
-    return this.customerAnalysisService.create(createCustomerAnalysisDto);
+  @Post('file')
+  createFile(@Body() createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
+    return this.customerAnalysisService.createFile(createCustomerAnalysisDto);
   }
 
-  @Post(':id/update')
-  updateBasicInfo(@Param('id') id: number, @Body() updateCustomerAnalysisDto: UpdateCustomerAnalysisDto) {
-    return this.customerAnalysisService.updateBasicInfo(id, updateCustomerAnalysisDto);
+  @Put('file/:fileId/update-all')
+  updateAll(@Param('fileId') fileId: number, @Body() dto: CreateCustomerAnalysisDto) {
+    return this.customerAnalysisService.updateAll(fileId, dto);
   }
 
-  @Post(':id/psychographics')
-  addPsychographics(@Param('id') id: number, @Body() createPsychographicsDto: CreateCustomerPsychographicsDto) {
-    return this.customerAnalysisService.addPsychographics(id, createPsychographicsDto);
+  @Post('file/:fileId/section')
+  addSection(@Param('fileId') fileId: number, @Body() dto: AddSectionDto) {
+    return this.customerAnalysisService.addSection(fileId, dto);
   }
 
-  @Post(':id/behavior')
-  addBehavior(@Param('id') id: number, @Body() createBehaviorDto: CreateCustomerBehaviorDto) {
-    return this.customerAnalysisService.addBehavior(id, createBehaviorDto);
+  @Post('file/:fileId/section/:sectionTitle/question')
+  addQuestion(@Param('fileId') fileId: number, @Param('sectionTitle') sectionTitle: string, @Body() dto: AddQuestionDto) {
+    return this.customerAnalysisService.addQuestion(fileId, sectionTitle, dto);
   }
 
-  @Post(':id/feedback')
-  addFeedback(@Param('id') id: number, @Body() createFeedbackDto: CreateCustomerFeedbackDto) {
-    return this.customerAnalysisService.addFeedback(id, createFeedbackDto);
+  @Post('file/:fileId/company')
+  addCompany(@Param('fileId') fileId: number, @Body() dto: AddCompanyDto) {
+    return this.customerAnalysisService.addCompany(fileId, dto);
   }
 
-  @Post(':id/dynamic-question')
-  addDynamicQuestion(@Param('id') id: number, @Body() createDynamicQuestionDto: CreateCustomerDynamicQuestionDto) {
-    return this.customerAnalysisService.addDynamicQuestion(id, createDynamicQuestionDto);
+  @Put('file/:fileId')
+  updateFile(@Param('fileId') fileId: number, @Body() dto: CreateCustomerAnalysisDto) {
+    return this.customerAnalysisService.updateFile(fileId, dto);
   }
 
-  @Post(':id/save')
-  saveAll(@Param('id') id: number, @Body() updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
-    return this.customerAnalysisService.saveAll(id, updateDto);
+  @Get('file/:fileId')
+  async findOneFile(@Param('fileId') fileId: number) {
+    const file = await this.customerAnalysisService.findOneFile(fileId);
+    if (!file) throw new NotFoundException('File not found');
+    return file;
   }
 
-  @Put(':id/update-all')
-  updateAllInfo(@Param('id') id: number, @Body() updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
-    return this.customerAnalysisService.updateAllInfo(id, updateDto);
+  @Get('files')
+  findAllFiles() {
+    return this.customerAnalysisService.findAllFiles();
   }
 
-  @Get("file/all")
-  findAll() {
-    return this.customerAnalysisService.findAll();
-  }
+  @Put('file/:fileId/company/update-name')
+ updateCompanyName(
+  @Param('fileId') fileId: number,
+  @Body() dto: UpdateCompanyNameDto
+ ) {
+  return this.customerAnalysisService.updateCompanyName(fileId, dto);
+}
 
-  @Get(':id')
-  findOne(@Param('id') id: number) {
-    return this.customerAnalysisService.findOne(id);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: number) {
-    return this.customerAnalysisService.remove(id);
+  @Delete('file/:fileId')
+  removeFile(@Param('fileId') fileId: number) {
+    return this.customerAnalysisService.removeFile(fileId);
   }
 }
