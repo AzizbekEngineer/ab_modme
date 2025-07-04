@@ -1,71 +1,20 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
-import { CustomerPsychographics } from './customer-psychographics.entity';
-import { CustomerBehavior } from './customer-behavior.entity';
-import { CustomerFeedback } from './customer-feedback.entity';
-import { CustomerDynamicQuestion } from './customer-dynamic-question.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { CustomerSection } from './customer-section.entity';
 
-@Entity('customer_analysis')
+@Entity()
 export class CustomerAnalysis {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
+  @Column()
   fileName: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  companyRepresentative: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  participantName: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  image: string;
-
-  @Column({ type: 'integer', nullable: true })
-  age: number;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  gender: string;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  maritalStatus: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  educationLevel: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  workplace: string;
-
-  @Column({ type: 'varchar', length: 100, nullable: true })
-  position: string;
-
-  @Column({ type: 'numeric', precision: 15, scale: 2, nullable: true })
-  annualIncome: number;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  location: string;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  numberOfChildren: string;
-
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  householdSize: string;
-
-  @Column({ type: 'text', nullable: true })
-  languagesSpoken: string;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @OneToMany(() => CustomerPsychographics, psychographics => psychographics.customer, { cascade: true })
-  psychographics: CustomerPsychographics[];
+  @UpdateDateColumn()
+  lastSavedAt: Date;
 
-  @OneToMany(() => CustomerBehavior, behavior => behavior.customer, { cascade: true })
-  behavior: CustomerBehavior[];
-
-  @OneToMany(() => CustomerFeedback, feedback => feedback.customer, { cascade: true })
-  feedback: CustomerFeedback[];
-
-  @OneToMany(() => CustomerDynamicQuestion, question => question.customer, { cascade: true })
-  dynamicQuestions: CustomerDynamicQuestion[];
+  @OneToMany(() => CustomerSection, section => section.customerAnalysis, { cascade: true })
+  sections: CustomerSection[];
 }

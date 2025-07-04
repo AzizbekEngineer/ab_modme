@@ -1,177 +1,81 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class CustomerQuestionDto {
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  id?: number;
+
+  @IsOptional()
+  @Type(() => String)
+  @IsString()
+  question?: string;
+
+  @IsOptional()
+  @Type(() => String)
+  @IsString()
+  answer?: string;
+}
+
+export class CustomerSectionDto {
+  @Type(() => String)
+  @IsString()
+  title: string;
+
+  @Type(() => String)
+  @IsString()
+  company: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CustomerQuestionDto)
+  questions?: CustomerQuestionDto[];
+}
 
 export class CreateCustomerAnalysisDto {
+  @IsOptional()
+  @Type(() => String)
   @IsString()
-  @IsNotEmpty()
-  fileName: string;
+  fileName?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CustomerSectionDto)
+  sections?: CustomerSectionDto[];
 }
 
-export class UpdateCustomerAnalysisDto {
+export class AddSectionDto {
   @IsString()
-  @IsNotEmpty()
-  fileName: string;
+  title: string;
 
-  @IsString()
-  @IsNotEmpty()
-  companyRepresentative: string;
-
-  @IsString()
-  @IsNotEmpty()
-  participantName: string;
-
-  @IsString()
-  @IsOptional()
-  image: string;
-
-  @IsNumber()
-  @IsOptional()
-  age: number;
-
-  @IsString()
-  @IsOptional()
-  gender: string;
-
-  @IsString()
-  @IsOptional()
-  maritalStatus: string;
-
-  @IsString()
-  @IsOptional()
-  educationLevel: string;
-
-  @IsString()
-  @IsOptional()
-  workplace: string;
-
-  @IsString()
-  @IsOptional()
-  position: string;
-
-  @IsNumber()
-  @IsOptional()
-  annualIncome: number;
-
-  @IsString()
-  @IsOptional()
-  location: string;
-
-  @IsString()
-  @IsOptional()
-  numberOfChildren: string;
-
-  @IsString()
-  @IsOptional()
-  householdSize: string;
-
-  @IsString()
-  @IsOptional()
-  languagesSpoken: string;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CustomerQuestionDto)
+  questions?: CustomerQuestionDto[];
 }
 
-export class CreateCustomerPsychographicsDto {
-  @IsString()
-  @IsOptional()
-  hobbies: string;
 
+export class AddQuestionDto {
+  @Type(() => String)
   @IsString()
-  @IsOptional()
-  socialMedia: string;
-
-  @IsString()
-  @IsOptional()
-  frequentWebsites: string;
-
-  @IsString()
-  @IsOptional()
-  values: string;
-
-  @IsString()
-  @IsOptional()
-  lifeGoals: string;
-
-  @IsString()
-  @IsOptional()
-  freeTimeActivities: string;
-
-  @IsString()
-  @IsOptional()
-  favoriteBrands: string;
-}
-
-export class CreateCustomerBehaviorDto {
-  @IsString()
-  @IsOptional()
-  purchaseFrequency: string;
-
-  @IsString()
-  @IsOptional()
-  purchaseLocation: string;
-
-  @IsString()
-  @IsOptional()
-  infoSources: string;
-
-  @IsString()
-  @IsOptional()
-  motivationFactors: string;
-
-  @IsString()
-  @IsOptional()
-  lastPurchaseDate: string;
-
-  @IsString()
-  @IsOptional()
-  triesNewProducts: string;
-
-  @IsString()
-  @IsOptional()
-  preferredMarketingChannel: string;
-
-  @IsString()
-  @IsOptional()
-  referralLikelihood: string;
-
-  @IsString()
-  @IsOptional()
-  brandSwitchReason: string;
-}
-
-export class CreateCustomerFeedbackDto {
-  @IsString()
-  @IsOptional()
-  importantFeatures: string;
-
-  @IsString()
-  @IsOptional()
-  desiredChanges: string;
-
-  @IsString()
-  @IsOptional()
-  priceVsQualityPreference: string;
-
-  @IsString()
-  @IsOptional()
-  preferredPaymentMethod: string;
-
-  @IsString()
-  @IsOptional()
-  likedDislikedAspects: string;
-
-  @IsString()
-  @IsOptional()
-  additionalSuggestions: string;
-
-  @IsString()
-  @IsOptional()
-  newsSourcePreference: string;
-}
-
-export class CreateCustomerDynamicQuestionDto {
-  @IsString()
-  @IsNotEmpty()
   question: string;
 
-  @IsString()
   @IsOptional()
-  answer: string;
+  @Type(() => String)
+  @IsString()
+  answer?: string;
+}
+
+export class AddCompanyDto {
+  @Type(() => String)
+  @IsString()
+  company: string;
+}
+
+export class UpdateCompanyNameDto {
+  oldCompany: string;
+  newCompany: string;
 }

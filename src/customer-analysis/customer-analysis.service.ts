@@ -2,264 +2,374 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CustomerAnalysis } from './entities/customer-analysis.entity';
-import { CreateCustomerAnalysisDto, UpdateCustomerAnalysisDto, CreateCustomerPsychographicsDto, CreateCustomerBehaviorDto, CreateCustomerFeedbackDto, CreateCustomerDynamicQuestionDto } from './dto/create-customer-analysis.dto';
-import { CustomerPsychographics } from './entities/customer-psychographics.entity';
-import { CustomerBehavior } from './entities/customer-behavior.entity';
-import { CustomerFeedback } from './entities/customer-feedback.entity';
-import { CustomerDynamicQuestion } from './entities/customer-dynamic-question.entity';
+import { CustomerSection } from './entities/customer-section.entity';
+import { CustomerQuestion } from './entities/customer-question.entity';
+import { CreateCustomerAnalysisDto, AddSectionDto, AddQuestionDto, AddCompanyDto, UpdateCompanyNameDto } from './dto/create-customer-analysis.dto';
+
+const backendData = {
+  fileName: "FileNomi",
+  data: [
+    {
+      company: "Kompaniya 1",
+      sections: [
+        {
+          title: "Xulq-atvor ma'lumot",
+          questions: [
+            {
+              question: "Sotib olishdan avval qayerdan ma'lumot qidirasiz?",
+              answer: "",
+            },
+            {
+              question: "Sotib olishingizga nima turtki bo‘ladi?",
+              answer: "",
+            },
+          ],
+        },
+        {
+          title: "Fanlar",
+          questions: [
+            {
+              question: "Qaysi fan yoqadi?",
+              answer: "",
+            },
+            {
+              question: "Qaysi fan qiyin?",
+              answer: "",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      company: "Kompaniya 2",
+      sections: [
+        {
+          title: "Xulq-atvor ma'lumot",
+          questions: [
+            {
+              question: "Sotib olishdan avval qayerdan ma'lumot qidirasiz?",
+              answer: "",
+            },
+            {
+              question: "Sotib olishingizga nima turtki bo‘ladi?",
+              answer: "",
+            },
+          ],
+        },
+        {
+          title: "Fanlar",
+          questions: [
+            {
+              question: "Qaysi fan yoqadi?",
+              answer: "",
+            },
+            {
+              question: "Qaysi fan qiyin?",
+              answer: "",
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 @Injectable()
 export class CustomerAnalysisService {
   constructor(
     @InjectRepository(CustomerAnalysis)
     private customerAnalysisRepository: Repository<CustomerAnalysis>,
-    @InjectRepository(CustomerPsychographics)
-    private psychographicsRepository: Repository<CustomerPsychographics>,
-    @InjectRepository(CustomerBehavior)
-    private behaviorRepository: Repository<CustomerBehavior>,
-    @InjectRepository(CustomerFeedback)
-    private feedbackRepository: Repository<CustomerFeedback>,
-    @InjectRepository(CustomerDynamicQuestion)
-    private dynamicQuestionRepository: Repository<CustomerDynamicQuestion>,
+    @InjectRepository(CustomerSection)
+    private customerSectionRepository: Repository<CustomerSection>,
+    @InjectRepository(CustomerQuestion)
+    private customerQuestionRepository: Repository<CustomerQuestion>,
   ) {}
 
-  async create(createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
-    const customerAnalysis = this.customerAnalysisRepository.create(createCustomerAnalysisDto);
-    return await this.customerAnalysisRepository.save(customerAnalysis);
-  }
+  async createFile(createCustomerAnalysisDto: CreateCustomerAnalysisDto) {
+    const file = this.customerAnalysisRepository.create({
+      fileName: createCustomerAnalysisDto.fileName || backendData.fileName,
+      createdAt: new Date(),
+      lastSavedAt: new Date(),
+    });
+    const savedFile = await this.customerAnalysisRepository.save(file);
 
-  async updateBasicInfo(id: number, updateCustomerAnalysisDto: UpdateCustomerAnalysisDto) {
-    const customerAnalysis = await this.findOne(id);
-    Object.assign(customerAnalysis, updateCustomerAnalysisDto);
-    return await this.customerAnalysisRepository.save(customerAnalysis);
-  }
-
-  async addPsychographics(analysisId: number, createPsychographicsDto: CreateCustomerPsychographicsDto) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const existing = await this.psychographicsRepository.findOne({ where: { customer: { id: analysisId } } });
-    if (!existing) {
-      const psychographics = this.psychographicsRepository.create({ ...createPsychographicsDto, customer: { id: customerAnalysis.id } });
-      return await this.psychographicsRepository.save(psychographics);
+    const sectionEntities = [];
+    if (createCustomerAnalysisDto.sections && createCustomerAnalysisDto.sections.length > 0) {
+      createCustomerAnalysisDto.sections.forEach(section => {
+        sectionEntities.push(this.customerSectionRepository.create({
+          title: section.title,
+          company: section.company,
+          customerAnalysis: savedFile,
+        }));
+      });
+    } else {
+      backendData.data.forEach(companyData => {
+        companyData.sections.forEach(section => {
+          sectionEntities.push(this.customerSectionRepository.create({
+            title: section.title,
+            company: companyData.company,
+            customerAnalysis: savedFile,
+          }));
+        });
+      });
     }
-    return existing;
-  }
+    const savedSections = await this.customerSectionRepository.save(sectionEntities);
 
-  async addBehavior(analysisId: number, createBehaviorDto: CreateCustomerBehaviorDto) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const existing = await this.behaviorRepository.findOne({ where: { customer: { id: analysisId } } });
-    if (!existing) {
-      const behavior = this.behaviorRepository.create({ ...createBehaviorDto, customer: { id: customerAnalysis.id } });
-      return await this.behaviorRepository.save(behavior);
+    const questionEntities = [];
+    let sectionIndex = 0;
+    if (createCustomerAnalysisDto.sections && createCustomerAnalysisDto.sections.length > 0) {
+      createCustomerAnalysisDto.sections.forEach((section, index) => {
+        const sectionEntity = savedSections[index];
+        section.questions?.forEach(question => {
+          questionEntities.push(this.customerQuestionRepository.create({
+            question: question.question,
+            answer: question.answer || "",
+            customerSection: sectionEntity,
+          }));
+        });
+      });
+    } else {
+      backendData.data.forEach((companyData, companyIndex) => {
+        companyData.sections.forEach((section, index) => {
+          const sectionEntity = savedSections[companyIndex * 2 + index];
+          section.questions.forEach(question => {
+            questionEntities.push(this.customerQuestionRepository.create({
+              question: question.question,
+              answer: question.answer,
+              customerSection: sectionEntity,
+            }));
+          });
+        });
+      });
     }
-    return existing;
+    await this.customerQuestionRepository.save(questionEntities);
+
+    return await this.findOneFile(savedFile.id);
   }
 
-  async addFeedback(analysisId: number, createFeedbackDto: CreateCustomerFeedbackDto) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const existing = await this.feedbackRepository.findOne({ where: { customer: { id: analysisId } } });
-    if (!existing) {
-      const feedback = this.feedbackRepository.create({ ...createFeedbackDto, customer: { id: customerAnalysis.id } });
-      return await this.feedbackRepository.save(feedback);
-    }
-    return existing;
+  async updateAll(fileId: number, dto: CreateCustomerAnalysisDto) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id: fileId },
+    relations: ['sections', 'sections.questions'],
+  });
+  if (!file) throw new NotFoundException('File not found');
+
+  if (dto.fileName) {
+    file.fileName = dto.fileName;
   }
 
-  async addDynamicQuestion(analysisId: number, createDynamicQuestionDto: CreateCustomerDynamicQuestionDto) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id: analysisId } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    const existing = await this.dynamicQuestionRepository.findOne({ where: { customer: { id: analysisId }, question: createDynamicQuestionDto.question } });
-    if (!existing) {
-      const question = this.dynamicQuestionRepository.create({ ...createDynamicQuestionDto, customer: { id: customerAnalysis.id } });
-      return await this.dynamicQuestionRepository.save(question);
-    }
-    return existing;
-  }
+  if (dto.sections) {
+    for (const sectionDto of dto.sections) {
+      const existingSection = file.sections.find(
+        s => s.title === sectionDto.title && s.company === sectionDto.company
+      );
 
-  async saveAll(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
+      if (!existingSection) continue;
 
-    return await this.customerAnalysisRepository.manager.transaction(async transactionalEntityManager => {
-      await transactionalEntityManager.createQueryBuilder()
-        .update(CustomerAnalysis)
-        .set({
-          fileName: updateDto.fileName,
-          companyRepresentative: updateDto.companyRepresentative,
-          participantName: updateDto.participantName,
-          image: updateDto.image,
-          age: updateDto.age,
-          gender: updateDto.gender,
-          maritalStatus: updateDto.maritalStatus,
-          educationLevel: updateDto.educationLevel,
-          workplace: updateDto.workplace,
-          position: updateDto.position,
-          annualIncome: updateDto.annualIncome,
-          location: updateDto.location,
-          numberOfChildren: updateDto.numberOfChildren,
-          householdSize: updateDto.householdSize,
-          languagesSpoken: updateDto.languagesSpoken
-        })
-        .where("id = :id", { id })
-        .execute();
+      if (sectionDto.questions) {
+        for (const questionDto of sectionDto.questions) {
+          if (!questionDto.id) continue;
 
-      if (updateDto.psychographics) {
-        const psychographicsData = Array.isArray(updateDto.psychographics) ? updateDto.psychographics : [updateDto.psychographics];
-        for (const data of psychographicsData) {
-          const existing = await transactionalEntityManager.findOne(CustomerPsychographics, { where: { customer: { id } } });
-          if (!existing) {
-            await transactionalEntityManager.createQueryBuilder()
-              .insert()
-              .into(CustomerPsychographics)
-              .values({ ...data, customer: { id } })
-              .execute();
+          const existingQuestion = existingSection.questions.find(q => q.id === questionDto.id);
+          if (!existingQuestion) continue;
+
+          if (typeof questionDto.answer === 'string') {
+            existingQuestion.answer = questionDto.answer;
+            await this.customerQuestionRepository.save(existingQuestion);
           }
         }
       }
+    }
+  }
 
-      if (updateDto.behavior) {
-        const behaviorData = Array.isArray(updateDto.behavior) ? updateDto.behavior : [updateDto.behavior];
-        for (const data of behaviorData) {
-          const existing = await transactionalEntityManager.findOne(CustomerBehavior, { where: { customer: { id } } });
-          if (!existing) {
-            await transactionalEntityManager.createQueryBuilder()
-              .insert()
-              .into(CustomerBehavior)
-              .values({ ...data, customer: { id } })
-              .execute();
-          }
-        }
-      }
+  file.lastSavedAt = new Date();
+  await this.customerAnalysisRepository.save(file);
 
-      if (updateDto.feedback) {
-        const feedbackData = Array.isArray(updateDto.feedback) ? updateDto.feedback : [updateDto.feedback];
-        for (const data of feedbackData) {
-          const existing = await transactionalEntityManager.findOne(CustomerFeedback, { where: { customer: { id } } });
-          if (!existing) {
-            await transactionalEntityManager.createQueryBuilder()
-              .insert()
-              .into(CustomerFeedback)
-              .values({ ...data, customer: { id } })
-              .execute();
-          }
-        }
-      }
+  return await this.findOneFile(fileId);
+}
 
-      if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
-        for (const questionDto of updateDto.dynamicQuestions) {
-          const existing = await transactionalEntityManager.findOne(CustomerDynamicQuestion, { where: { customer: { id }, question: questionDto.question } });
-          if (!existing) {
-            await transactionalEntityManager.createQueryBuilder()
-              .insert()
-              .into(CustomerDynamicQuestion)
-              .values({ ...questionDto, customer: { id } })
-              .execute();
-          }
-        }
-      }
+  async addSection(fileId: number, dto: AddSectionDto) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id: fileId },
+    relations: ['sections', 'sections.questions'],
+  });
+  if (!file) throw new NotFoundException('File not found');
 
-      return await transactionalEntityManager.findOne(CustomerAnalysis, { where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
+  const companies = backendData.data.map(d => d.company);
+
+  for (const company of companies) {
+    const alreadyExists = file.sections.find(
+      s => s.title === dto.title && s.company === company,
+    );
+    if (alreadyExists) continue;
+
+    const section = new CustomerSection();
+    section.title = dto.title;
+    section.company = company;
+    section.customerAnalysis = file;
+
+    section.questions = (dto.questions || []).map(q => {
+      const question = new CustomerQuestion();
+      question.question = q.question;
+      question.answer = q.answer || '';
+      question.customerSection = section;
+      return question;
+    });
+
+    file.sections.push(section);
+  }
+
+  file.lastSavedAt = new Date();
+  await this.customerAnalysisRepository.save(file); // cascade orqali hammasi saqlanadi
+
+  return await this.findOneFile(fileId);
+}
+
+async addQuestion(fileId: number, sectionTitle: string, dto: AddQuestionDto) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id: fileId },
+    relations: ['sections', 'sections.questions'],
+  });
+  if (!file) throw new NotFoundException('File not found');
+
+  const matchedSections = file.sections.filter(s => s.title === sectionTitle);
+  if (matchedSections.length === 0) throw new NotFoundException('Section not found');
+
+  for (const section of matchedSections) {
+    const question = new CustomerQuestion();
+    question.question = dto.question;
+    question.answer = dto.answer || '';
+    question.customerSection = section;
+
+    section.questions.push(question);
+  }
+
+  file.lastSavedAt = new Date();
+  await this.customerAnalysisRepository.save(file);
+
+  return await this.findOneFile(fileId);
+}
+
+async addCompany(fileId: number, dto: AddCompanyDto) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id: fileId },
+    relations: ['sections', 'sections.questions'],
+  });
+  if (!file) throw new NotFoundException('File not found');
+
+  const newCompany = dto.company;
+  const isExist = file.sections.some(section => section.company === newCompany);
+  if (isExist) {
+    throw new Error(`Kompaniya allaqachon mavjud: ${newCompany}`);
+  }
+
+  const uniqueTitles = [...new Set(file.sections.map(s => s.title))];
+
+  for (const title of uniqueTitles) {
+    const templateSection = file.sections.find(s => s.title === title);
+    if (!templateSection) continue;
+
+    const section = new CustomerSection();
+    section.title = title;
+    section.company = newCompany;
+    section.customerAnalysis = file;
+
+    section.questions = templateSection.questions.map(q => {
+      const question = new CustomerQuestion();
+      question.question = q.question;
+      question.answer = '';
+      question.customerSection = section;
+      return question;
+    });
+
+    file.sections.push(section);
+  }
+
+  file.lastSavedAt = new Date();
+  await this.customerAnalysisRepository.save(file);
+
+  return await this.findOneFile(fileId);
+}
+
+
+  async updateFile(fileId: number, dto: CreateCustomerAnalysisDto) {
+    const file = await this.customerAnalysisRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    file.fileName = dto.fileName;
+    file.lastSavedAt = new Date();
+    return await this.customerAnalysisRepository.save(file);
+  }
+
+  async findOneFile(id: number) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id },
+    relations: ['sections', 'sections.questions'],
+  });
+
+  if (!file) {
+    throw new NotFoundException('File topilmadi');
+  }
+
+  const companies = [...new Set(file.sections.map(s => s.company))];
+
+  return {
+    id: file.id,
+    fileName: file.fileName,
+    createdAt: file.createdAt,
+    lastSavedAt: file.lastSavedAt,
+    data: companies.map(company => ({
+      company,
+      sections: file.sections
+        .filter(s => s.company === company)
+        .map(section => ({
+          title: section.title,
+          questions: section.questions.map(q => ({
+            id: q.id,
+            question: q.question,
+            answer: q.answer,
+          })),
+        })),
+    })),
+  };
+}
+
+
+
+  async findAllFiles() {
+    return await this.customerAnalysisRepository.find({
+      select: ['id', 'fileName', 'createdAt', 'lastSavedAt'],
     });
   }
 
-  async updateAllInfo(id: number, updateDto: UpdateCustomerAnalysisDto & { psychographics?: CreateCustomerPsychographicsDto; behavior?: CreateCustomerBehaviorDto; feedback?: CreateCustomerFeedbackDto; dynamicQuestions?: CreateCustomerDynamicQuestionDto[] }) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id } });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
+  async updateCompanyName(fileId: number, dto: UpdateCompanyNameDto) {
+  const file = await this.customerAnalysisRepository.findOne({
+    where: { id: fileId },
+    relations: ['sections'],
+  });
 
-    await this.customerAnalysisRepository.createQueryBuilder()
-      .update(CustomerAnalysis)
-      .set({
-        fileName: updateDto.fileName,
-        companyRepresentative: updateDto.companyRepresentative,
-        participantName: updateDto.participantName,
-        image: updateDto.image,
-        age: updateDto.age,
-        gender: updateDto.gender,
-        maritalStatus: updateDto.maritalStatus,
-        educationLevel: updateDto.educationLevel,
-        workplace: updateDto.workplace,
-        position: updateDto.position,
-        annualIncome: updateDto.annualIncome,
-        location: updateDto.location,
-        numberOfChildren: updateDto.numberOfChildren,
-        householdSize: updateDto.householdSize,
-        languagesSpoken: updateDto.languagesSpoken
-      })
-      .where("id = :id", { id })
-      .execute();
+  if (!file) throw new NotFoundException('File not found');
 
-    if (updateDto.psychographics) {
-      const psychographicsData = Array.isArray(updateDto.psychographics) ? updateDto.psychographics : [updateDto.psychographics];
-      for (const data of psychographicsData) {
-        const existing = await this.psychographicsRepository.findOne({ where: { customer: { id } } });
-        if (!existing) {
-          await this.psychographicsRepository.createQueryBuilder()
-            .insert()
-            .into(CustomerPsychographics)
-            .values({ ...data, customer: { id } })
-            .execute();
-        }
-      }
-    }
+  const { oldCompany, newCompany } = dto;
 
-    if (updateDto.behavior) {
-      const behaviorData = Array.isArray(updateDto.behavior) ? updateDto.behavior : [updateDto.behavior];
-      for (const data of behaviorData) {
-        const existing = await this.behaviorRepository.findOne({ where: { customer: { id } } });
-        if (!existing) {
-          await this.behaviorRepository.createQueryBuilder()
-            .insert()
-            .into(CustomerBehavior)
-            .values({ ...data, customer: { id } })
-            .execute();
-        }
-      }
-    }
-
-    if (updateDto.feedback) {
-      const feedbackData = Array.isArray(updateDto.feedback) ? updateDto.feedback : [updateDto.feedback];
-      for (const data of feedbackData) {
-        const existing = await this.feedbackRepository.findOne({ where: { customer: { id } } });
-        if (!existing) {
-          await this.feedbackRepository.createQueryBuilder()
-            .insert()
-            .into(CustomerFeedback)
-            .values({ ...data, customer: { id } })
-            .execute();
-        }
-      }
-    }
-
-    if (updateDto.dynamicQuestions && Array.isArray(updateDto.dynamicQuestions)) {
-      for (const questionDto of updateDto.dynamicQuestions) {
-        const existing = await this.dynamicQuestionRepository.findOne({ where: { customer: { id }, question: questionDto.question } });
-        if (!existing) {
-          await this.dynamicQuestionRepository.createQueryBuilder()
-            .insert()
-            .into(CustomerDynamicQuestion)
-            .values({ ...questionDto, customer: { id } })
-            .execute();
-        }
-      }
-    }
-
-    return await this.customerAnalysisRepository.findOne({ where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
+  const matchedSections = file.sections.filter(s => s.company === oldCompany);
+  if (matchedSections.length === 0) {
+    throw new NotFoundException(`Kompaniya topilmadi: ${oldCompany}`);
   }
 
-  async findAll() {
-    return await this.customerAnalysisRepository.find({ relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
+  for (const section of matchedSections) {
+    section.company = newCompany;
   }
 
-  async findOne(id: number) {
-    const customerAnalysis = await this.customerAnalysisRepository.findOne({ where: { id }, relations: ['psychographics', 'behavior', 'feedback', 'dynamicQuestions'] });
-    if (!customerAnalysis) throw new NotFoundException('Customer analysis not found');
-    return customerAnalysis;
-  }
+  file.lastSavedAt = new Date();
+  await this.customerAnalysisRepository.save(file);
 
-  async remove(id: number) {
-    const customerAnalysis = await this.findOne(id);
-    return await this.customerAnalysisRepository.remove(customerAnalysis);
+  return await this.findOneFile(fileId);
+}
+
+
+  async removeFile(fileId: number) {
+    const file = await this.customerAnalysisRepository.findOne({ where: { id: fileId } });
+    if (!file) throw new NotFoundException('File not found');
+    return await this.customerAnalysisRepository.remove(file);
   }
 }
