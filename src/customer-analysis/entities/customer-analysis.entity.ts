@@ -12,8 +12,9 @@ export class CustomerAnalysis {
   @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @Column({ type: 'timestamp', nullable: true })
   lastSavedAt: Date;
+
 
   @OneToMany(() => CustomerSection, section => section.customerAnalysis, { cascade: true })
   sections: CustomerSection[];
