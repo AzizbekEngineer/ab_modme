@@ -158,7 +158,10 @@ export class MarketAnalysisService {
         );
 
         if (existing) {
-          Object.assign(existing, volume);
+          existing.value = volume.value !== undefined ? volume.value : existing.value;
+          existing.percentage = volume.percentage !== undefined ? volume.percentage : existing.percentage;
+          existing.description = volume.description !== undefined ? volume.description : existing.description;
+          existing.currency = volume.currency !== undefined ? volume.currency : existing.currency;
           await this.marketVolumeRepository.save(existing);
         } else {
           const newVolume = this.marketVolumeRepository.create({
@@ -200,7 +203,8 @@ export class MarketAnalysisService {
         );
 
         if (existing) {
-          Object.assign(existing, pestle);
+          existing.analysis = pestle.analysis !== undefined ? pestle.analysis : existing.analysis;
+          existing.impact = pestle.impact !== undefined ? pestle.impact : existing.impact;
           await this.pestleAnalysisRepository.save(existing);
         } else {
           const newPestle = this.pestleAnalysisRepository.create({
