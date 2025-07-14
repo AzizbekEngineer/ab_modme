@@ -74,7 +74,7 @@ export class AnalysisFileService {
     return { id: updatedFile.id, fileName: updatedFile.fileName, createdAt: updatedFile.createdAt, updatedAt: updatedFile.updatedAt, data: updatedFile.data };
   }
 
-  async findAll(): Promise<{ id: number; fileName: string; createdAt: Date; updatedAt: Date; data: { companyId: number; company: string; questions: { question: string; answers: string[] }[] }[] }[]> {
+  async findAll(): Promise<{ id: number; fileName: string; createdAt: Date; updatedAt: Date;}[]> {
     const files = await this.analysisFileRepository.find({ relations: ['companies'], order: { createdAt: 'ASC' } });
     return files.map(file => {
       file.companies.sort((a, b) => a.id - b.id);
@@ -82,12 +82,7 @@ export class AnalysisFileService {
         id: file.id,
         fileName: file.fileName,
         createdAt: file.createdAt,
-        updatedAt: file.updatedAt,
-        data: file.companies.map(c => ({
-          companyId: c.id,
-          company: c.name || 'Nomsiz kompaniya',
-          questions: c.questions.map(q => ({ question: q.question, answers: [...q.answers] })),
-        })),
+        updatedAt: file.updatedAt
       };
     });
   }
