@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { AnalysisFile } from './course-analysis.entity';
 
-@Entity()
+@Entity('courses-analysis')
 export class Company {
   @PrimaryGeneratedColumn()
   id: number;
