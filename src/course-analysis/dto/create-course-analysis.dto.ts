@@ -1,50 +1,57 @@
-// src/course-analysis/dto/create-course-analysis.dto.ts
-import { IsString, IsOptional, IsNotEmpty, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, ValidateNested, IsOptional, ArrayMaxSize, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateCourseAnalysisDto {
+class QuestionDto {
   @IsString()
   @IsNotEmpty()
-  subjectName: string;
+  question: string;
+
+  @IsArray()
+  @IsOptional()
+  answers: string[];
+}
+
+class CompanyDto {
+  @IsInt()
+  @IsNotEmpty()
+  companyId: number;
 
   @IsString()
   @IsOptional()
-  companyName?: string;
+  company?: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuestionDto)
+  questions: QuestionDto[];
 }
 
-export class CreateCourseAnalysisCriteriaDto {
-  @IsBoolean()
+export class CreateAnalysisFileDto {
+  @IsString()
+  @IsNotEmpty()
   @IsOptional()
-  lessonPlanReady?: boolean;
+  fileName?: string;
+}
 
-  @IsBoolean()
-  @IsOptional()
-  generalMaterialReady?: boolean;
+export class UpdateAnalysisFileDto extends CreateAnalysisFileDto {}
 
-  @IsBoolean()
-  @IsOptional()
-  blockMaterialReady?: boolean;
+export class UpdateAllAnalysisFileDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CompanyDto)
+  data: { companyId: number; company?: string; questions: { question: string; answers: string[] }[] }[];
+}
 
-  @IsBoolean()
-  @IsOptional()
-  lessonMaterialReady?: boolean;
+export class AddAnswerDto {
+  @IsString()
+  @IsNotEmpty()
+  company: string;
 
-  @IsBoolean()
-  @IsOptional()
-  lessonScenarioReady?: boolean;
+  @IsString()
+  @IsNotEmpty()
+  question: string;
 
-  @IsBoolean()
-  @IsOptional()
-  gamesAndActivitiesReady?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  combinationTasksReady?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  motivationSystemExists?: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  teachersScoreAbove50?: boolean;
+  @IsString()
+  @IsNotEmpty()
+  answer: string;
 }

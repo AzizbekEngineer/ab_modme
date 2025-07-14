@@ -17,7 +17,7 @@ import { AttendancesModule } from './attendances/attendances.module';
 import { MarketAnalysisModule } from './market-analysis/market-analysis.module';
 import { CustomerAnalysisModule } from './customer-analysis/customer-analysis.module';
 import { CompetitorAnalysisModule } from './competitor-analysis/competitor-analysis.module';
-import { CourseAnalysisModule } from './course-analysis/course-analysis.module';
+import { AnalysisFileModule } from './course-analysis/course-analysis.module';
 import { CustomerPersonaModule } from './customer-persona/customer-persona.module';
 import { AuthModule } from './auth/auth.module';
 
@@ -54,7 +54,7 @@ import { AuthModule } from './auth/auth.module';
     MarketAnalysisModule,
     CustomerAnalysisModule,
     CompetitorAnalysisModule,
-    CourseAnalysisModule,
+    AnalysisFileModule,
     CustomerPersonaModule,
     AuthModule,
   ],

@@ -1,20 +1,27 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn } from 'typeorm';
-import { CourseAnalysisCriteria } from './course-analysis-criteria.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Company } from './course-analysis.company.entity';
 
-@Entity('course_analysis')
-export class CourseAnalysis {
+@Entity()
+export class AnalysisFile {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: 'varchar', length: 255, nullable: false })
-  subjectName: string;
+  @Column({ unique: true })
+  fileName: string;
 
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  companyName: string;
+  @Column({ type: 'jsonb', default: () => "'[]'" })
+  data: {
+    companyId: number;
+    company: string;
+    questions: { question: string; answers: string[] }[];
+  }[];
 
-  @CreateDateColumn()
+  @OneToMany(() => Company, company => company.file, { cascade: true })
+  companies: Company[];
+
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @OneToMany(() => CourseAnalysisCriteria, criteria => criteria.courseAnalysis, { cascade: true })
-  criteria: CourseAnalysisCriteria[];
+  @UpdateDateColumn()
+  updatedAt: Date;
 }
